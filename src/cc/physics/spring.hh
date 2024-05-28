@@ -15,10 +15,6 @@ class Spring : public Entity {
     }
 
     Vector get_force(Vector position) {
-        printf("position: ");
-        position.print();
-        printf("origin: ");
-        origin.print();
         Vector displacement = position - origin;
         return displacement * -k;
     }

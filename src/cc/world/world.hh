@@ -33,9 +33,6 @@ class World {
             if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
                 continue;
             }
-            printf("position.x: %f\n", position.x);
-            printf("position.y: %f\n", position.y);
-            printf("\n");
             word_graphics[(int)position.x + (int)position.y * 80] = (uint8_t)color;
         }
     }

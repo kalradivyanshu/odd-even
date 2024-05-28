@@ -49,14 +49,6 @@ class Entity {
         this->velocity.y += this->acceleration.y;
         this->position.x += this->velocity.x;
         this->position.y += this->velocity.y;
-        printf("acc: ");
-        this->acceleration.print();
-        printf("vel: ");
-        this->velocity.print();
-        printf("pos: ");
-        this->position.print();
-        printf("force: ");
-        this->force.print();
     }
 
     virtual void tick() = 0;

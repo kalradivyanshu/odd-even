@@ -44,6 +44,18 @@ window.onload = async function () {
         if (index >= 6400) {
           throw new Error("Index out of bounds");
         }
+        if (arr[index] == 0) {
+          ctx.fillStyle = "black";
+        }
+        if (arr[index] == 1) {
+          ctx.fillStyle = "gray";
+        }
+        if (arr[index] == 2) {
+          ctx.fillStyle = "yellowgreen";
+        }
+        if (arr[index] == 3) {
+          ctx.fillStyle = "orange";
+        }
         if (arr[index] != 0) {
           console.log(index, arr);
           ctx.fillRect(x, y, cellSize, cellSize);
