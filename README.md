@@ -151,4 +151,4 @@ And easy peezy:
 
 Wait, thats not right.
 
-After scratching my head, I realised that my ticking function is broken, I detect collision and change the velocity after the objects have gone through each other, then they go back, and collide again, getting stuck in a loop. I need to break ticking into proposed position update and position updates, then before they collide I change their velocity. Over-engineered? WHAT EVEN DO YOU MEAN? I will die before I learn better way to do things that the first instinct I have, good day to you sir!
+After scratching my head, I realised that my ticking function is broken, I detect collision and change the velocity after the objects have gone through each other, then they go back, and collide again, getting stuck in a loop. I need to break ticking into proposed position update and position updates, then before they collide I change their velocity. Over-engineered? WHAT EVEN DO YOU MEAN? I will die before I learn better way to do things than the first instinct I have, good day to you sir!
