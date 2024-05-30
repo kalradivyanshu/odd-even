@@ -27,7 +27,7 @@ class Vector {
 
     auto operator<=>(const Vector& other) const = default;
 
-    void print() {
+    void print() const {
         printf("x: %f\n", x);
         printf("y: %f\n", y);
         printf("\n");

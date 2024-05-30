@@ -1,7 +1,10 @@
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <memory>
+#include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "physics/entity.hh"
@@ -9,8 +12,10 @@
 
 namespace world {
 class World {
-    std::unordered_map<double, std::unique_ptr<physics::Entity>> entities = {};
+    std::map<double, std::unique_ptr<physics::Entity>> entities = {};
     std::vector<uint8_t> word_graphics = std::vector<uint8_t>(80 * 80);
+    std::unordered_map<std::string, double> collisions = {};
+    int time = 0;
 
    public:
     void add_entity(std::unique_ptr<physics::Entity>&& entity) {
@@ -40,6 +45,7 @@ class World {
             }
             word_graphics[(int)position.x + (int)position.y * 80] = graphics::color_u8(color);
         }
+        this->time++;
     }
 
     bool did_any_collide() {
@@ -52,7 +58,15 @@ class World {
                     j++;
                     continue;
                 }
-                flag |= entity1->did_collide(entity2.get());
+                std::string collision_key = std::format("{}:{}", id1, id2);
+                if (collisions.contains(collision_key) && time - collisions[collision_key] < 2) {
+                    continue;
+                }
+                bool did_collide = entity1->did_collide(entity2.get());
+                if (did_collide) {
+                    flag = true;
+                    collisions[collision_key] = time;
+                }
                 j++;
             }
             i++;

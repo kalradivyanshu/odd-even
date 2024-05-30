@@ -9,12 +9,12 @@ namespace physics {
 int get_sign(const Vector const& loc, const std::pair<Vector, Vector> const& position_update) {
     // two point form of a line
     double a = position_update.second.y - position_update.first.y;
-    double b = position_update.first.x - position_update.second.x;
+    double b = position_update.second.x - position_update.first.x;
 
     double y = loc.y - position_update.first.y;
     double x = loc.x - position_update.first.x;
 
-    double result = y / x - a / b;
+    double result = y * b - a * x;
 
     if (result > 0) {
         return 1;
