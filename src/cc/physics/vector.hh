@@ -1,3 +1,4 @@
+#pragma once
 namespace physics {
 class Vector {
    public:
@@ -15,6 +16,8 @@ class Vector {
     Vector operator*(double scalar) {
         return Vector{x * scalar, y * scalar};
     }
+
+    auto operator<=>(const Vector& other) const = default;
 
     void print() {
         printf("x: %f\n", x);

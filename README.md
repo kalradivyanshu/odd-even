@@ -83,3 +83,49 @@ class Spring : public Entity {
 
 So far, so good:
 ![spring demo](/brags/physics.gif)
+
+## Collisions
+
+The interesting thing about this setup is that updates to position can happen with mutliple steps within a tick. This means: P and Q can move like this: from p1 to p2 and q1 to q2.
+
+![alt text](brags/collision.png)
+
+So if we just compare exact cell positions to detect collisions, we will never detect any b/w P and Q. So we need to improvise. Thankfully what we can do is make a list of position before and after the tick and use line segments between old and new position and see if any intersect! Is there a better way? Probably, but I won't google it, ofc mine is the best solution. What do you mean arrogance?
+
+Some basic algebra is needed to detect the intersection of the two update vectors:
+
+### Two point formula of a line:
+
+Given a line going through $(x_1, y_1)$ and $(x_2, y_2)$ the two point formula of a line is:
+$\frac{(y - y_1)}{(x - x_1)} = \frac{(y_2 - y_1)}{(x_2 - x_1)}$ so $$\frac{(y - y_1)}{(x - x_1)} - \frac{(y_2 - y_1)}{(x_2 - x_1)} = 0$$ (basically the slope b/w the two points will always be equal to the slope b/w any other two points).
+
+### Do two points lie on the same side of a line?
+
+Given two arbitary points $(x_a, y_a)$ and $(x_b, y_b)$ they lie on the same side of the line if and only if:
+$$\frac{(y_a - y_1)}{(x_a - x_1)} - \frac{(y_2 - y_1)}{(x_2 - x_1)},  \frac{(y_b - y_1)}{(x_b - x_1)} - \frac{(y_2 - y_1)}{(x_2 - x_1)}$$
+have the same sign.
+
+So now we just need to check if the old and new position of the entity we are checking lies on the same side of the old and new position entity we are checking against.
+
+### Then god said, f\*\*\* u, have an edge case.
+
+I tried making it work for this:
+
+![alt text](/brags/physics.gif)
+
+and it always returns collided. Why is that, lets revisit the line thingy if one of the objects is static:
+
+![alt text](brags/collision_edge.png)
+
+In all three cases, p is on the line that connects $q_1$ and $q_2$, so we actually need four cases:
+
+1. If $p$ and $q$ are both moving but along the same line
+2. If $p$ and $q$ are both moving but along different lines
+3. If one of $p$ and $q$ is moving, one is static.
+4. If both $p$ and $q$ are static.
+
+In 2 our method works, for 1 it has collided if both one of the position points are b/w the position points of the other one. For 3 it has collided if the static one lies on the same line and it is b/w the position updates of the one moving. For 4, only collided if both positions are the same.
+
+And, well it works (atleast for case 3, remember kids, its not testing in production, its distributed and decentralised edge tested.)
+
+![collision working*](brags/collision.gif)

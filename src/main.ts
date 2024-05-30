@@ -13,8 +13,6 @@ let rect = canvas.getBoundingClientRect();
 canvas.onmousemove = (event) => coordinate(event, rect);
 
 window.onload = async function () {
-  console.log("WOW");
-
   let wasm = await InitWasm();
   let world = wasm.new_world();
 
@@ -23,8 +21,6 @@ window.onload = async function () {
   // paint the entire canvas black
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  console.log(canvas, canvas.height, canvas.width, ctx);
 
   // Define the size of each cell
   const cellSize = 10;
@@ -57,11 +53,10 @@ window.onload = async function () {
           ctx.fillStyle = "orange";
         }
         if (arr[index] != 0) {
-          console.log(index, arr);
           ctx.fillRect(x, y, cellSize, cellSize);
         }
       }
     }
-  }, 33);
+  }, 100);
   // Draw the grid
 };
