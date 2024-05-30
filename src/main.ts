@@ -52,6 +52,9 @@ window.onload = async function () {
         if (arr[index] == 3) {
           ctx.fillStyle = "orange";
         }
+        if (arr[index] == 4) {
+          ctx.fillStyle = "red";
+        }
         if (arr[index] != 0) {
           ctx.fillRect(x, y, cellSize, cellSize);
         }
