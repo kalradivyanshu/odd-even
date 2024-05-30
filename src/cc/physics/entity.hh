@@ -67,6 +67,26 @@ class Entity {
         this->velocity.y += this->acceleration.y;
         this->position.x += this->velocity.x;
         this->position.y += this->velocity.y;
+        this->bound_collisions();
+    }
+
+    void bound_collisions() {
+        if (this->position.x < 0) {
+            this->position.x = 0;
+            this->velocity.x = -this->velocity.x;
+        }
+        if (this->position.x >= 80) {
+            this->position.x = 79;
+            this->velocity.x = -this->velocity.x;
+        }
+        if (this->position.y < 0) {
+            this->position.y = 0;
+            this->velocity.y = -this->velocity.y;
+        }
+        if (this->position.y >= 80) {
+            this->position.y = 79;
+            this->velocity.y = -this->velocity.y;
+        }
     }
 
     void react_to_collision(double m_a, const Vector& v_a_0) {
