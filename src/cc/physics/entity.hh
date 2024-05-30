@@ -69,10 +69,21 @@ class Entity {
         this->position.y += this->velocity.y;
     }
 
+    void react_to_collision(double m_a, const Vector& v_a_0) {
+        auto v_b_0 = this->velocity;
+        this->velocity = v_a_0 * (2 * m_a / (this->mass + m_a)) + v_b_0 * (this->mass - m_a) / (this->mass + m_a);
+    }
+
     bool did_collide(Entity* other) {
         auto this_update = this->get_position_update();
         auto other_update = other->get_position_update();
-        return is_colliding(this_update, other_update);
+        bool did_collide = is_colliding(this_update, other_update);
+        if (did_collide) {
+            auto v_b_0 = this->velocity;
+            this->react_to_collision(other->mass, other->velocity);
+            other->react_to_collision(this->mass, v_b_0);
+        }
+        return did_collide;
     }
 
     virtual void tick() = 0;

@@ -86,6 +86,8 @@ So far, so good:
 
 ## Collisions
 
+### Detections
+
 The interesting thing about this setup is that updates to position can happen with mutliple steps within a tick. This means: P and Q can move like this: from p1 to p2 and q1 to q2.
 
 ![alt text](brags/collision.png)
@@ -94,12 +96,12 @@ So if we just compare exact cell positions to detect collisions, we will never d
 
 Some basic algebra is needed to detect the intersection of the two update vectors:
 
-### Two point formula of a line:
+#### Two point formula of a line:
 
 Given a line going through $(x_1, y_1)$ and $(x_2, y_2)$ the two point formula of a line is:
 $\frac{(y - y_1)}{(x - x_1)} = \frac{(y_2 - y_1)}{(x_2 - x_1)}$ so $$\frac{(y - y_1)}{(x - x_1)} - \frac{(y_2 - y_1)}{(x_2 - x_1)} = 0$$ (basically the slope b/w the two points will always be equal to the slope b/w any other two points).
 
-### Do two points lie on the same side of a line?
+#### Do two points lie on the same side of a line?
 
 Given two arbitary points $(x_a, y_a)$ and $(x_b, y_b)$ they lie on the same side of the line if and only if:
 $$\frac{(y_a - y_1)}{(x_a - x_1)} - \frac{(y_2 - y_1)}{(x_2 - x_1)},  \frac{(y_b - y_1)}{(x_b - x_1)} - \frac{(y_2 - y_1)}{(x_2 - x_1)}$$
@@ -107,7 +109,7 @@ have the same sign.
 
 So now we just need to check if the old and new position of the entity we are checking lies on the same side of the old and new position entity we are checking against.
 
-### Then god said, f\*\*\* u, have an edge case.
+#### Then god said, f\*\*\* u, have an edge case.
 
 I tried making it work for this:
 
@@ -129,3 +131,24 @@ In 2 our method works, for 1 it has collided if both one of the position points 
 And, well it works (atleast for case 3, remember kids, its not testing in production, its distributed and decentralised edge testing.)
 
 ![collision working*](brags/collision.gif)
+
+### Elastic Collisions
+
+We will assume that all collisions are perfectly elastic. So that simplifies things, not that I can't figure out dampnings and whatnots, ofc I can, but I rather not.
+
+During elastic collisions 2 things are conserved: total momentum and total kinetic energy. We can just google the final equation lol. So when 2 items $a$, $b$ collide with a velocity of $v_a$ and $v_b$ the new velocities $v_a^1$ and $v_b^1$ are:
+
+$$
+v_a^1 = \frac{m_a - m_b}{m_a + m_b}*v_a + \frac{2m_b}{m_a + m_b}*v_b
+$$
+
+$$
+v_b^1 = \frac{m_a - m_b}{m_a + m_b}*v_b + \frac{2m_a}{m_a + m_b}*v_a
+$$
+
+And easy peezy:
+![collision bug*](brags/elastic_bug.gif)
+
+Wait, thats not right.
+
+After scratching my head, I realised that my ticking function is broken, I detect collision and change the velocity after the objects have gone through each other, then they go back, and collide again, getting stuck in a loop. I need to break ticking into proposed position update and position updates, then before they collide I change their velocity. Over-engineered? WHAT EVEN DO YOU MEAN? I will die before I learn better way to do things that the first instinct I have, good day to you sir!

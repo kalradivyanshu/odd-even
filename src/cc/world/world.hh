@@ -27,6 +27,7 @@ class World {
 
     void tick() {
         std::memset(word_graphics.data(), 0, 80 * 80);
+        this->did_any_collide();
         for (auto& [id, entity] : entities) {
             entity->tick();
         }
@@ -42,17 +43,21 @@ class World {
     }
 
     bool did_any_collide() {
+        int i = 0;
+        bool flag = false;
         for (auto& [id1, entity1] : entities) {
+            int j = 0;
             for (auto& [id2, entity2] : entities) {
-                if (id1 == id2) {
+                if (id1 == id2 || j <= i) {
+                    j++;
                     continue;
                 }
-                auto collided = entity1->did_collide(entity2.get());
-                if (collided)
-                    return true;
+                flag |= entity1->did_collide(entity2.get());
+                j++;
             }
+            i++;
         }
-        return false;
+        return flag;
     }
 
     uint8_t* get_graphics() {
