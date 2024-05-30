@@ -126,6 +126,6 @@ In all three cases, p is on the line that connects $q_1$ and $q_2$, so we actual
 
 In 2 our method works, for 1 it has collided if both one of the position points are b/w the position points of the other one. For 3 it has collided if the static one lies on the same line and it is b/w the position updates of the one moving. For 4, only collided if both positions are the same.
 
-And, well it works (atleast for case 3, remember kids, its not testing in production, its distributed and decentralised edge tested.)
+And, well it works (atleast for case 3, remember kids, its not testing in production, its distributed and decentralised edge testing.)
 
 ![collision working*](brags/collision.gif)
