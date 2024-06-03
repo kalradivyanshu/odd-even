@@ -1,9 +1,27 @@
-import InitWasm from "./cc/compiled/wasm_core";
+import InitWasm, { wasm } from "./cc/compiled/wasm_core";
 
 function coordinate(event: any, rect: DOMRect) {
   let x = event.clientX;
   let y = event.clientY;
-  console.log("po!!", { x: x - rect.left, y: y - rect.top });
+  console.log("po!!", { x: (x - rect.left) / 10, y: (y - rect.top) / 10 });
+  //@ts-ignore
+  let wasm: wasm = window.wasm;
+  //@ts-ignore
+  let world: number = window.world;
+
+  wasm.setup_spring_center(world, (x - rect.left) / 10, (y - rect.top) / 10);
+}
+
+function shoot(event: any, rect: DOMRect) {
+  let x = event.clientX;
+  let y = event.clientY;
+
+  //@ts-ignore
+  let wasm: wasm = window.wasm;
+  //@ts-ignore
+  let world: number = window.world;
+
+  wasm.shoot(world, (x - rect.left) / 10, (y - rect.top) / 10);
 }
 
 // Get the canvas element and its context
@@ -11,10 +29,16 @@ const canvas = document.getElementById("gridCanvas") as HTMLCanvasElement;
 let rect = canvas.getBoundingClientRect();
 
 canvas.onmousemove = (event) => coordinate(event, rect);
+canvas.onclick = (event) => shoot(event, rect);
 
 window.onload = async function () {
   let wasm = await InitWasm();
   let world = wasm.new_world();
+
+  //@ts-ignore
+  window.world = world;
+  //@ts-ignore
+  window.wasm = wasm;
 
   const ctx = canvas.getContext("2d")!;
 

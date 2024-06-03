@@ -194,3 +194,9 @@ Since we have 2, we can delete the BS code of checking if the vectors overlap, a
 
 And deleting 100 lines later:
 ![collision fixed finally!](brags/elastic_fix_final.gif)
+
+# Player
+
+The player will follow the mouse, as a spring as defined before, but to ensure the player doesn't keep oscillating we need damping! It seems straight forward, damping is just a force propotional to the velocity of the object, but in the opposite direction. `auto damping_force = this->get_velocity() * -1. * damping;` and done!
+
+![player motion](brags/player.gif)

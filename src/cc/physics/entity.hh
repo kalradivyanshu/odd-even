@@ -24,6 +24,10 @@ class Entity {
         force = new_force;
     }
 
+    Vector get_velocity() {
+        return velocity;
+    }
+
     void update_velocity(Vector new_velocity) {
         velocity = new_velocity;
     }

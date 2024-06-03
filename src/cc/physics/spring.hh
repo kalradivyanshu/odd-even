@@ -7,11 +7,13 @@ class Spring : public Entity {
    private:
     Vector origin;
     double k;
+    double damping;
 
    public:
-    Spring(Vector origin, double k) {
+    Spring(Vector origin, double k, double damping = 0.0) {
         this->origin = origin;
         this->k = k;
+        this->damping = damping;
     }
 
     Vector get_force(Vector position) {
@@ -19,8 +21,14 @@ class Spring : public Entity {
         return displacement * -k;
     }
 
+    void set_origin(Vector new_origin) {
+        this->origin = new_origin;
+    }
+
     void tick(double elapsed) {
-        update_force(get_force(get_position()));
+        auto force = get_force(get_position());
+        auto damping_force = this->get_velocity() * -1. * damping;
+        this->update_force(force + damping_force);
 
         this->compute_position(elapsed);
     }
