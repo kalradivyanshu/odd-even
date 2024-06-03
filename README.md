@@ -216,7 +216,9 @@ Our friend polar coordinate come into play:
 So:
 
 $$v_y = r * sin(\beta) = r * \frac{(C_y - p_y)}{H}$$
+
 $$v_x = r * cos(\beta) = r * \frac{(C_x - p_x)}{H}$$
+
 $$H = \sqrt([C_y - p_y]^2 + [C_x - p_x]^2)$$
 
 And voila!
