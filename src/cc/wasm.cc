@@ -14,7 +14,7 @@ uintptr_t new_world() {
         auto entity = std::make_unique<physics::StaticBody>(physics::Vector{40, 40});
         entity->set_position(physics::Vector::random());
         entity->update_velocity(physics::Vector::random(3., 3.));
-        entity->set_color(graphics::color_from_u8(i % 4));
+        entity->set_color(graphics::color_from_u8((i + 1) % 4));
 
         world->add_entity(std::move(entity));
     }

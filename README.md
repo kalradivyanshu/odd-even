@@ -156,3 +156,38 @@ After scratching my head, I realised that my ticking function is broken, I detec
 Ok, I patched it up by keeping a map of all the collisions, and ignoring collisions that happen b/w two objects that collided within the last 2 ticks. Will this create edge case? Ofcourse, but that is future me's problem, and I really don't care about that guy. Screw him, it works! Yay!
 
 ![collision fix](brags/ellastic_fix.gif)
+
+## Problems
+
+As any one who has ever worked with me, or if you read the above section and have 2 working brain cell, can guess, I made this way too complicated. And it doesn't work. AT ALL.
+
+![collision broken](brags/ellastic_broke.gif)
+Like wtf is even this? This is so broken its not even funny.
+
+I procastinated fixing this for 4 days, and then today realised that I have been missing something fundamental. Time! (somewhere christopher nolan has suddenly started paying attention.)
+
+See in the tick loop:
+
+```c++
+void compute_position() {
+  this->last_position.x = this->position.x;
+  this->last_position.y = this->position.y;
+
+  this->acceleration.x = this->force.x / this->mass;
+  this->acceleration.y = this->force.y / this->mass;
+  this->velocity.x += this->acceleration.x;
+  this->velocity.y += this->acceleration.y;
+  this->position.x += this->velocity.x;
+  this->position.y += this->velocity.y;
+  this->bound_collisions();
+}
+```
+
+This just assumes that one tick means the exact same everytime, and also that one tick is the exact unit of the velocity and force values. But that is not true. If you have ever used JavaScript you know no timer in JS is accurate. Ever. If the user keeps your tab in the background and their device is not connected to a charger, the 30ms `setInterval` will bloat to few seconds in the worse case.
+
+So how do we fix this and the collision overengineering?
+
+1. A tick must be 1ms always, if tick is called after 45ms, we will internally call tick 45 times.
+2. In one tick, a box must not move more than 1 cell, hence velocity has a upper cap of 1000 cell/sec.
+
+Since we have 2, we can delete the BS code of checking if the vectors overlap, and just say collided if the two boxes are in the same cell!

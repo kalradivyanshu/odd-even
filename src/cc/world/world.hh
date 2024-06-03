@@ -59,7 +59,7 @@ class World {
                     continue;
                 }
                 std::string collision_key = std::format("{}:{}", id1, id2);
-                if (collisions.contains(collision_key) && time - collisions[collision_key] < 2) {
+                if (collisions.contains(collision_key) && time - collisions[collision_key] < 5) {
                     continue;
                 }
                 bool did_collide = entity1->did_collide(entity2.get());
