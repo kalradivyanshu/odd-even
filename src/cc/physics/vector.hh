@@ -29,6 +29,10 @@ class Vector {
 
     auto operator<=>(const Vector& other) const = default;
 
+    bool compare_discreet(const Vector& other) const {
+        return ceil(x) == ceil(other.x) && ceil(y) == ceil(other.y);
+    }
+
     void print() const {
         printf("x: %f\n", x);
         printf("y: %f\n", y);

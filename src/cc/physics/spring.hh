@@ -19,10 +19,10 @@ class Spring : public Entity {
         return displacement * -k;
     }
 
-    void tick() {
+    void tick(double elapsed) {
         update_force(get_force(get_position()));
 
-        this->compute_position();
+        this->compute_position(elapsed);
     }
 };
 }  // namespace physics

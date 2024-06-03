@@ -191,3 +191,6 @@ So how do we fix this and the collision overengineering?
 2. In one tick, a box must not move more than 1 cell, hence velocity has a upper cap of 1000 cell/sec.
 
 Since we have 2, we can delete the BS code of checking if the vectors overlap, and just say collided if the two boxes are in the same cell!
+
+And deleting 100 lines later:
+![collision fixed finally!](brags/elastic_fix_final.gif)

@@ -14,10 +14,13 @@ namespace world {
 class World {
     std::map<double, std::unique_ptr<physics::Entity>> entities = {};
     std::vector<uint8_t> word_graphics = std::vector<uint8_t>(80 * 80);
-    std::unordered_map<std::string, double> collisions = {};
-    int time = 0;
+    double last_tick_time = 0;
 
    public:
+    World(double time_ms) {
+        this->last_tick_time = time_ms;
+    }
+
     void add_entity(std::unique_ptr<physics::Entity>&& entity) {
         entities.insert_or_assign(entity->get_id(), std::move(entity));
     }
@@ -30,11 +33,14 @@ class World {
         entities.erase(id);
     }
 
-    void tick() {
+    void tick(double time_ms) {
         std::memset(word_graphics.data(), 0, 80 * 80);
-        this->did_any_collide();
-        for (auto& [id, entity] : entities) {
-            entity->tick();
+        while (this->last_tick_time < time_ms) {
+            this->did_any_collide();
+            for (auto& [id, entity] : entities) {
+                entity->tick(0.001);
+            }
+            this->last_tick_time += 1.;
         }
 
         for (auto& [id, entity] : entities) {
@@ -45,7 +51,6 @@ class World {
             }
             word_graphics[(int)position.x + (int)position.y * 80] = graphics::color_u8(color);
         }
-        this->time++;
     }
 
     bool did_any_collide() {
@@ -59,14 +64,9 @@ class World {
                     continue;
                 }
                 std::string collision_key = std::format("{}:{}", id1, id2);
-                if (collisions.contains(collision_key) && time - collisions[collision_key] < 5) {
-                    continue;
-                }
+
                 bool did_collide = entity1->did_collide(entity2.get());
-                if (did_collide) {
-                    flag = true;
-                    collisions[collision_key] = time;
-                }
+                flag |= did_collide;
                 j++;
             }
             i++;

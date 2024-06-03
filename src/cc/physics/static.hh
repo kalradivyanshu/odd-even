@@ -9,8 +9,8 @@ class StaticBody : public Entity {
         this->set_position(position);
     }
 
-    void tick() {
-        this->compute_position();
+    void tick(double elapsed) {
+        this->compute_position(elapsed);
     }
 };
 }  // namespace physics

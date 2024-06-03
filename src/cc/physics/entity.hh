@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <utility>
 
-#include "physics/collision_helper.hh"
 #include "physics/vector.hh"
 #include "world/color.hh"
 
@@ -57,16 +56,17 @@ class Entity {
         return std::make_pair(last_position, position);
     }
 
-    void compute_position() {
-        this->last_position.x = this->position.x;
-        this->last_position.y = this->position.y;
+    void compute_position(double elapsed) {
+        this->last_position = this->position;
 
-        this->acceleration.x = this->force.x / this->mass;
-        this->acceleration.y = this->force.y / this->mass;
-        this->velocity.x += this->acceleration.x;
-        this->velocity.y += this->acceleration.y;
-        this->position.x += this->velocity.x;
-        this->position.y += this->velocity.y;
+        this->acceleration = this->force / this->mass;
+        this->velocity = this->velocity + this->acceleration * elapsed;
+
+        if (this->velocity.x > 1000) this->velocity.x = 1000;
+        if (this->velocity.y > 1000) this->velocity.y = 1000;
+
+        this->position = this->position + this->velocity * elapsed;
+
         this->bound_collisions();
     }
 
@@ -95,9 +95,7 @@ class Entity {
     }
 
     bool did_collide(Entity* other) {
-        auto this_update = this->get_position_update();
-        auto other_update = other->get_position_update();
-        bool did_collide = is_colliding(this_update, other_update);
+        bool did_collide = this->position.compare_discreet(other->position);
         if (did_collide) {
             auto v_b_0 = this->velocity;
             this->react_to_collision(other->mass, other->velocity);
@@ -106,6 +104,6 @@ class Entity {
         return did_collide;
     }
 
-    virtual void tick() = 0;
+    virtual void tick(double elapsed) = 0;
 };
 }  // namespace physics
