@@ -195,8 +195,30 @@ Since we have 2, we can delete the BS code of checking if the vectors overlap, a
 And deleting 100 lines later:
 ![collision fixed finally!](brags/elastic_fix_final.gif)
 
-# Player
+## Player
 
 The player will follow the mouse, as a spring as defined before, but to ensure the player doesn't keep oscillating we need damping! It seems straight forward, damping is just a force propotional to the velocity of the object, but in the opposite direction. `auto damping_force = this->get_velocity() * -1. * damping;` and done!
 
 ![player motion](brags/player.gif)
+
+## Bullet
+
+When the player clicks, a bullet needs to be fired in the direction of the click.
+
+![bullet triangle](brags/bullet_triangle.png)
+
+If the user clicks at C, and the player is at P, the bullet should have a velocity in the direction of $C - p$. But if we just set the velocity of bullet to $C - p$, the further the player is from the click, the faster the bullet, we don't want that.
+
+Our friend polar coordinate come into play:
+
+![polar coordinate](brags/polar_cartesian.png)
+
+So:
+
+$$v_y = r * sin(\beta) = r * \frac{(C_y - p_y)}{H}$$
+$$v_x = r * cos(\beta) = r * \frac{(C_x - p_x)}{H}$$
+$$H = \sqrt([C_y - p_y]^2 + [C_x - p_x]^2)$$
+
+And voila!
+
+![bullets](brags/bullets.gif)

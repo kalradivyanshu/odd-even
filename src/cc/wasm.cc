@@ -37,7 +37,19 @@ void shoot(uintptr_t world, double x, double y) {
     auto e = w->get_entity(static_body_id).get();
     auto pos = e->get_position();
     auto arr_pos = physics::Vector(x, y);
-    auto vel = arr_pos - pos;
+    auto diff = arr_pos - pos;
+    if (diff.x == 0 && diff.y == 0) {
+        diff = physics::Vector(1., 1.);
+    }
+    auto vel = physics::Vector(0., 0.);
+    auto hypo = sqrt(diff.x * diff.x + diff.y * diff.y);
+    auto sin = diff.y / hypo;
+    auto cos = diff.x / hypo;
+    vel.x = cos * 20.;
+    vel.y = sin * 20.;
+
+    pos.x += 1.;
+    pos.y += 1.;
 
     auto solid = std::make_unique<physics::StaticBody>(pos);
     solid->update_velocity(vel);
