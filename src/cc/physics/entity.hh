@@ -9,7 +9,7 @@
 namespace physics {
 
 class Entity {
-   private:
+   protected:
     Vector last_position;
     Vector position;
     Vector velocity;

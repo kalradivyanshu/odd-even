@@ -36,7 +36,7 @@ class World {
     void tick(double time_ms) {
         std::memset(word_graphics.data(), 0, 80 * 80);
         while (this->last_tick_time < time_ms) {
-            // this->did_any_collide();
+            this->did_any_collide();
             for (auto& [id, entity] : entities) {
                 entity->tick(0.001);
             }

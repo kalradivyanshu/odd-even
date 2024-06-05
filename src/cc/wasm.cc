@@ -1,6 +1,7 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 
+#include "physics/bullet.hh"
 #include "physics/spring.hh"
 #include "physics/static.hh"
 #include "world/world.hh"
@@ -39,19 +40,13 @@ void shoot(uintptr_t world, double x, double y) {
     auto arr_pos = physics::Vector(x, y);
     auto diff = arr_pos - pos;
     if (diff.x == 0 && diff.y == 0) {
-        diff = physics::Vector(1., 1.);
+        diff = physics::Vector(20., 0.);
     }
-    auto vel = physics::Vector(0., 0.);
-    auto hypo = sqrt(diff.x * diff.x + diff.y * diff.y);
-    auto sin = diff.y / hypo;
-    auto cos = diff.x / hypo;
-    vel.x = cos * 20.;
-    vel.y = sin * 20.;
-
+    auto vel = diff;
     pos.x += 1.;
     pos.y += 1.;
 
-    auto solid = std::make_unique<physics::StaticBody>(pos);
+    auto solid = std::make_unique<physics::Bullet>(pos);
     solid->update_velocity(vel);
     solid->set_color(graphics::GREEN);
     solid->update_mass(0.1);

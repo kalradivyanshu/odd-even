@@ -11,6 +11,16 @@ class Vector {
         return Vector{x + other.x, y + other.y};
     }
 
+    double get_magnitude() const {
+        return sqrt(x * x + y * y);
+    }
+
+    void set_magnitude(double magnitude) {
+        double current_magnitude = get_magnitude();
+        x *= magnitude / current_magnitude;
+        y *= magnitude / current_magnitude;
+    }
+
     Vector operator-(const Vector& other) const {
         return Vector{x - other.x, y - other.y};
     }
