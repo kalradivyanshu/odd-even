@@ -31,6 +31,17 @@ let rect = canvas.getBoundingClientRect();
 canvas.onmousemove = (event) => coordinate(event, rect);
 canvas.onclick = (event) => shoot(event, rect);
 
+// static Color from_color_u8(uint8_t color) {
+//   return Color((color & 0b00110000) << 4, (color & 0b00001100) << 2, color & 0b00000011);
+// }
+
+function from_color_u8(color: number): string {
+  let r = (color & 0b00110000) >> 4;
+  let g = (color & 0b00001100) >> 2;
+  let b = color & 0b00000011;
+  return `rgb(${r * 85}, ${g * 85}, ${b * 85})`;
+}
+
 window.onload = async function () {
   let wasm = await InitWasm();
   let world = wasm.new_world();
@@ -66,18 +77,8 @@ window.onload = async function () {
         }
         if (arr[index] == 0) {
           ctx.fillStyle = "black";
-        }
-        if (arr[index] == 1) {
-          ctx.fillStyle = "gray";
-        }
-        if (arr[index] == 2) {
-          ctx.fillStyle = "yellowgreen";
-        }
-        if (arr[index] == 3) {
-          ctx.fillStyle = "orange";
-        }
-        if (arr[index] == 4) {
-          ctx.fillStyle = "red";
+        } else {
+          ctx.fillStyle = from_color_u8(arr[index]);
         }
         if (arr[index] != 0) {
           ctx.fillRect(x, y, cellSize, cellSize);

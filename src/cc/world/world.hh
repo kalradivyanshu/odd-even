@@ -49,7 +49,7 @@ class World {
             if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
                 continue;
             }
-            word_graphics[(int)position.x + (int)position.y * 80] = graphics::color_u8(color);
+            word_graphics[(int)position.x + (int)position.y * 80] = color.to_color_u8();
         }
     }
 

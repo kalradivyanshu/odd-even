@@ -17,7 +17,7 @@ class Entity {
     double mass = 1.0;
     Vector force;
     double id = (double)rand() / (double)RAND_MAX;
-    graphics::ColorName color;
+    graphics::Color color = graphics::Color(255, 255, 255);
 
    public:
     void update_force(Vector new_force) {
@@ -36,11 +36,11 @@ class Entity {
         this->mass = new_mass;
     }
 
-    void set_color(graphics::ColorName new_color) {
+    void set_color(graphics::Color new_color) {
         this->color = new_color;
     }
 
-    graphics::ColorName get_color() {
+    graphics::Color get_color() {
         return this->color;
     }
 
