@@ -1,12 +1,16 @@
-#include "physics/entity.hh"
+#include "game/team.hh"
+#include "physics/solid_body.hh"
 
 #pragma once
 
 namespace physics {
 class Bullet : public Entity {
    public:
+    game::Team team = game::Team::TEAM_RED;
+
     Bullet(Vector position) {
         this->set_position(position);
+        this->entity_type = "Bullet";
     }
 
     void stabilize_velocity() {

@@ -1,61 +1,33 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 
-#include "physics/bullet.hh"
-#include "physics/spring.hh"
-#include "physics/static.hh"
-#include "world/world.hh"
+#include "game/game.hh"
 
 using namespace emscripten;
 double static_body_id = 0.;
 
 uintptr_t new_world() {
-    auto world = new world::World(emscripten_get_now());
-
-    auto spring = std::make_unique<physics::Spring>(physics::Vector(40., 40.), 10, 1.3);
-    static_body_id = spring->get_id();
-
-    spring->set_color(graphics::ORANGE);
-
-    world->add_entity(std::move(spring));
-
-    return (uintptr_t)(world);
+    auto game = new game::Game(emscripten_get_now());
+    return (uintptr_t)(game);
 }
 
-void tick(uintptr_t world) {
-    ((world::World*)world)->tick(emscripten_get_now());
+void tick(uintptr_t game) {
+    auto g = ((game::Game*)game);
+    g->world.tick(emscripten_get_now());
 }
 
 void setup_spring_center(uintptr_t world, double x, double y) {
-    auto w = ((world::World*)world);
-    auto e = w->get_entity(static_body_id).get();
-    auto spring = dynamic_cast<physics::Spring*>(e);
-    spring->set_origin(physics::Vector(x, y));
+    auto g = ((game::Game*)world);
+    g->get_p1()->move(x, y);
 }
 
 void shoot(uintptr_t world, double x, double y) {
-    auto w = ((world::World*)world);
-    auto e = w->get_entity(static_body_id).get();
-    auto pos = e->get_position();
-    auto arr_pos = physics::Vector(x, y);
-    auto diff = arr_pos - pos;
-    if (diff.x == 0 && diff.y == 0) {
-        diff = physics::Vector(20., 0.);
-    }
-    auto vel = diff;
-    pos.x += 1.;
-    pos.y += 1.;
-
-    auto solid = std::make_unique<physics::Bullet>(pos);
-    solid->update_velocity(vel);
-    solid->set_color(graphics::GREEN);
-    solid->update_mass(0.1);
-
-    w->add_entity(std::move(solid));
+    auto g = ((game::Game*)world);
+    g->shoot(x, y);
 }
 
 uintptr_t get_graphics(uintptr_t world) {
-    return (uintptr_t)(((world::World*)world)->get_graphics());
+    return (uintptr_t)(((game::Game*)world)->world.get_graphics());
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {

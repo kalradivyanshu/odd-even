@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <functional>
 #include <utility>
 
 #include "physics/vector.hh"
@@ -20,6 +21,17 @@ class Entity {
     graphics::Color color = graphics::Color(255, 255, 255);
 
    public:
+    virtual ~Entity() = default;
+    std::string entity_type = "Entity";
+
+    std::function<void(Entity*)> on_collision = [](Entity* e) {};
+
+    Entity() {
+        this->position = Vector(0, 0);
+        this->velocity = Vector(0, 0);
+        this->force = Vector(0, 0);
+    }
+
     void update_force(Vector new_force) {
         force = new_force;
     }
@@ -104,6 +116,7 @@ class Entity {
             auto v_b_0 = this->velocity;
             this->react_to_collision(other->mass, other->velocity);
             other->react_to_collision(this->mass, v_b_0);
+            this->on_collision(other);
         }
         return did_collide;
     }

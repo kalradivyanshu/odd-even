@@ -3,7 +3,6 @@ import InitWasm, { wasm } from "./cc/compiled/wasm_core";
 function coordinate(event: any, rect: DOMRect) {
   let x = event.clientX;
   let y = event.clientY;
-  console.log("po!!", { x: (x - rect.left) / 10, y: (y - rect.top) / 10 });
   //@ts-ignore
   let wasm: wasm = window.wasm;
   //@ts-ignore

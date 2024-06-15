@@ -10,7 +10,13 @@ class Spring : public Entity {
     double damping;
 
    public:
+    Spring() : Entity() {}
+
     Spring(Vector origin, double k, double damping = 0.0) {
+        this->setup(origin, k, damping);
+    }
+
+    void setup(Vector origin, double k, double damping = 0.0) {
         this->origin = origin;
         this->k = k;
         this->damping = damping;
