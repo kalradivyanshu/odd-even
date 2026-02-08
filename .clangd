@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+    - "-Isrc/cc"
+    - "-I/Users/divyanshu/code/personal/odd-even/src/cc"
+    - "-I/Users/divyanshu/.local/emsdk/upstream/emscripten/system/include/"
+    - "-std=c++20"

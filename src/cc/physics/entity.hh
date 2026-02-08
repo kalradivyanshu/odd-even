@@ -52,7 +52,7 @@ class Entity {
         this->color = new_color;
     }
 
-    graphics::Color get_color() {
+    graphics::Color get_color() const {
         return this->color;
     }
 
@@ -60,12 +60,27 @@ class Entity {
         return id;
     }
 
-    Vector get_position() {
+    Vector get_position() const {
         return position;
     }
 
     void set_position(Vector new_position) {
         position = new_position;
+    }
+
+    /**
+     * @brief Draw the entity to the graphics vector
+     * @param graphics The graphics vector to draw to
+     */
+    virtual void draw_self(std::vector<uint8_t>& graphics) {
+        const auto position = this->get_position();
+        const auto color = this->get_color();
+
+        if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
+            return;
+        }
+
+        graphics[(int)position.x + (int)position.y * 80] = color.to_color_u8();
     }
 
     std::pair<Vector, Vector> get_position_update() {

@@ -3,7 +3,7 @@
 #include <format>
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -44,12 +44,7 @@ class World {
         }
 
         for (auto& [id, entity] : entities) {
-            auto position = entity->get_position();
-            auto color = entity->get_color();
-            if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
-                continue;
-            }
-            word_graphics[(int)position.x + (int)position.y * 80] = color.to_color_u8();
+            entity->draw_self(word_graphics);
         }
     }
 

@@ -1,22 +1,23 @@
-import InitWasm, { wasm } from "./cc/compiled/wasm_core";
+import InitWasm from "./cc/compiled/wasm_core";
+import { wasm_ty } from "./cc/compiled/wasm_types";
 
 function coordinate(event: any, rect: DOMRect) {
   let x = event.clientX;
   let y = event.clientY;
   //@ts-ignore
-  let wasm: wasm = window.wasm;
+  let wasm: wasm_ty = window.wasm;
   //@ts-ignore
   let world: number = window.world;
-
+   
   wasm.setup_spring_center(world, (x - rect.left) / 10, (y - rect.top) / 10);
 }
 
 function shoot(event: any, rect: DOMRect) {
   let x = event.clientX;
   let y = event.clientY;
-
+  
   //@ts-ignore
-  let wasm: wasm = window.wasm;
+  let wasm: wasm_ty = window.wasm;
   //@ts-ignore
   let world: number = window.world;
 

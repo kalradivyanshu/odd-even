@@ -17,7 +17,7 @@ add_executable(${PROJECT_NAME}
 )
 
 
-set_target_properties(${PROJECT_NAME}  PROPERTIES LINK_FLAGS "--bind -sWASM=1 -sINITIAL_MEMORY=144179200 -sEXPORT_ES6=1 -O3 -msimd128 -fexceptions")
+set_target_properties(${PROJECT_NAME}  PROPERTIES LINK_FLAGS "--bind -sWASM=1 -sINITIAL_MEMORY=144179200 -sEXPORT_ES6=1 -O3 -msimd128 -fexceptions -sEXPORTED_RUNTIME_METHODS=['HEAPU8']")
 
 
 target_link_libraries(${PROJECT_NAME})

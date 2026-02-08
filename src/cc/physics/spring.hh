@@ -16,13 +16,17 @@ class Spring : public Entity {
         this->setup(origin, k, damping);
     }
 
+    Vector get_origin() const {
+        return origin;
+    }
+
     void setup(Vector origin, double k, double damping = 0.0) {
         this->origin = origin;
         this->k = k;
         this->damping = damping;
     }
 
-    Vector get_force(Vector position) {
+    Vector get_force(Vector position) const {
         Vector displacement = position - origin;
         return displacement * -k;
     }

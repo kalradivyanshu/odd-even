@@ -1,3 +1,4 @@
+#include <cstdint>
 namespace graphics {
 
 uint8_t scale_down_to_16bit(uint8_t x) {
@@ -16,7 +17,7 @@ class Color {
         this->b = scale_down_to_16bit(b);
     }
 
-    uint8_t to_color_u8() {
+    uint8_t to_color_u8() const {
         return (r << 4) | (g << 2) | b;
     }
 

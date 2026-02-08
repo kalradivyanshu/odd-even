@@ -72,6 +72,8 @@ class Game {
         auto p1 = std::make_unique<Player>(Team::TEAM_RED);
         this->p1_id = p1->get_id();
 
+        p1->set_position(physics::Vector(40., 40.));
+
         auto p2 = std::make_unique<Player>(Team::TEAM_BLUE);
         this->p2_id = p2->get_id();
 
