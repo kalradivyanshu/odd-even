@@ -36,11 +36,11 @@ class Spring : public Entity {
     }
 
     void tick(double elapsed) {
-        auto force = get_force(get_position());
-        auto damping_force = this->get_velocity() * -1. * damping;
-        this->update_force(force + damping_force);
+        // auto force = get_force(get_position());
+        // auto damping_force = this->get_velocity() * -1. * damping;
+        // this->update_force(force + damping_force);
 
-        this->compute_position(elapsed);
+        // this->compute_position(elapsed);
     }
 };
 }  // namespace physics

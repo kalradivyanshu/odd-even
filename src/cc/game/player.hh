@@ -38,7 +38,7 @@ class Player : public physics::Spring {
     double get_angle() const {
         auto position = this->get_position();
         auto origin = this->get_origin();
-        auto radians = -1.*std::atan2(origin.y - position.y, origin.x - position.x);
+        auto radians = std::atan2(position.y - origin.y, position.x - origin.x);
         auto angle = radians * 180. / M_PI;
         if(angle < 0) angle += 360.;
         return angle;
@@ -52,11 +52,11 @@ class Player : public physics::Spring {
         if(angle < 112.5 && angle > 67.5) // NORTH
             return position + physics::Vector(-1., 1.);
         if(angle < 157.5 && angle > 112.5) // NORTH-WEST
-            return position + physics::Vector(1., 0.);
+            return position + physics::Vector(0., 1.);
         if(angle < 202.5 && angle > 157.5) // WEST
             return position + physics::Vector(1., 1.);
         if(angle < 247.5 && angle > 202.5) // SOUTH-WEST
-            return position + physics::Vector(0., -1.);
+            return position + physics::Vector(1., 0.);
         if(angle < 292.5 && angle > 247.5) // SOUTH
             return position + physics::Vector(1., -1.);
         if(angle < 337.5 && angle > 292.5) // SOUTH-EAST
@@ -72,11 +72,11 @@ class Player : public physics::Spring {
         if(angle < 112.5 && angle > 67.5) // NORTH
             return position + physics::Vector(1., 1.);
         if(angle < 157.5 && angle > 112.5) // NORTH-WEST
-            return position + physics::Vector(0., 1.);
+            return position + physics::Vector(1., 0.);
         if(angle < 202.5 && angle > 157.5) // WEST
             return position + physics::Vector(1., -1.);
         if(angle < 247.5 && angle > 202.5) // SOUTH-WEST
-            return position + physics::Vector(1., 0.);
+            return position + physics::Vector(0., -1);
         if(angle < 292.5 && angle > 247.5) // SOUTH
             return position + physics::Vector(-1., -1.);
         if(angle < 337.5 && angle > 292.5) // SOUTH-EAST
