@@ -38,7 +38,9 @@ class Player : public physics::Spring {
     double get_angle() const {
         auto position = this->get_position();
         auto origin = this->get_origin();
-        auto radians = std::atan2(position.y - origin.y, position.x - origin.x);
+        // we want the player to be origin, and the position to be the cursor
+        // we also invert the y axis to match the screen coordinates
+        auto radians = std::atan2(-1.*(origin.y - position.y), origin.x - position.x);
         auto angle = radians * 180. / M_PI;
         if(angle < 0) angle += 360.;
         return angle;
