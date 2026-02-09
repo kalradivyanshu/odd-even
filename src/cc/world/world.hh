@@ -38,7 +38,7 @@ class World {
         while (this->last_tick_time < time_ms) {
             this->did_any_collide();
             for (auto& [id, entity] : entities) {
-                entity->tick(0.001);
+                entity->tick(0.001, time_ms);
             }
             this->last_tick_time += 1.;
         }

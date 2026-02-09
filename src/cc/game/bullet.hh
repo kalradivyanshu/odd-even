@@ -26,7 +26,7 @@ class Bullet : public Entity {
         }
     }
 
-    void tick(double elapsed) {
+    void tick(double elapsed, double time_ms) override {
         this->stabilize_velocity();
         this->compute_position(elapsed);
     }

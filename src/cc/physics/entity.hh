@@ -9,6 +9,17 @@
 
 namespace physics {
 
+enum Direction {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    NORTH_EAST,
+    NORTH_WEST,
+    SOUTH_EAST,
+    SOUTH_WEST,
+};
+
 class Entity {
    protected:
     Vector last_position;
@@ -136,6 +147,6 @@ class Entity {
         return did_collide;
     }
 
-    virtual void tick(double elapsed) = 0;
+    virtual void tick(double elapsed, double time_ms) = 0;
 };
 }  // namespace physics

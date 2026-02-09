@@ -35,7 +35,7 @@ class Spring : public Entity {
         this->origin = new_origin;
     }
 
-    void tick(double elapsed) {
+    void tick(double elapsed, double time_ms) override {
         auto force = get_force(get_position());
         auto damping_force = this->get_velocity() * -1. * damping;
         this->update_force(force + damping_force);

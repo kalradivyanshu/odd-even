@@ -46,53 +46,62 @@ class Player : public physics::Spring {
         return angle;
     }
 
-    physics::Vector left_tail_position(const double angle, const physics::Vector& position) const {
+    physics::Direction get_direction() const {
+        auto angle = this->get_angle();
         if(angle < 22.5 || angle > 360. -22.5) // EAST
-            return position + physics::Vector(-1., -1.);
+            return physics::Direction::EAST;
         if(angle < 67.5 && angle > 22.5) // NORTH-EAST
-            return position + physics::Vector(-1., 0.);
+            return physics::Direction::NORTH_EAST;
         if(angle < 112.5 && angle > 67.5) // NORTH
-            return position + physics::Vector(-1., 1.);
+            return physics::Direction::NORTH;
         if(angle < 157.5 && angle > 112.5) // NORTH-WEST
-            return position + physics::Vector(0., 1.);
+            return physics::Direction::NORTH_WEST;
         if(angle < 202.5 && angle > 157.5) // WEST
-            return position + physics::Vector(1., 1.);
+            return physics::Direction::WEST;
         if(angle < 247.5 && angle > 202.5) // SOUTH-WEST
-            return position + physics::Vector(1., 0.);
+            return physics::Direction::SOUTH_WEST;
         if(angle < 292.5 && angle > 247.5) // SOUTH
-            return position + physics::Vector(1., -1.);
+            return physics::Direction::SOUTH;
         if(angle < 337.5 && angle > 292.5) // SOUTH-EAST
-            return position + physics::Vector(0, -1.);
-        return position + physics::Vector(-1., 1.);
+            return physics::Direction::SOUTH_EAST;
+        return physics::Direction::NORTH;
     }
 
-    physics::Vector right_tail_position(const double angle, const physics::Vector& position) const {
-        if(angle < 22.5 || angle > 360. -22.5) // EAST
-            return position + physics::Vector(-1., 1.);
-        if(angle < 67.5 && angle > 22.5) // NORTH-EAST
-            return position + physics::Vector(0., 1.);
-        if(angle < 112.5 && angle > 67.5) // NORTH
-            return position + physics::Vector(1., 1.);
-        if(angle < 157.5 && angle > 112.5) // NORTH-WEST
-            return position + physics::Vector(1., 0.);
-        if(angle < 202.5 && angle > 157.5) // WEST
-            return position + physics::Vector(1., -1.);
-        if(angle < 247.5 && angle > 202.5) // SOUTH-WEST
-            return position + physics::Vector(0., -1);
-        if(angle < 292.5 && angle > 247.5) // SOUTH
-            return position + physics::Vector(-1., -1.);
-        if(angle < 337.5 && angle > 292.5) // SOUTH-EAST
-            return position + physics::Vector(-1., 0.);   
-        return position + physics::Vector(1., 1.);
+    physics::Vector left_tail_position(const physics::Direction direction, const physics::Vector& position) const {
+        switch(direction) {
+            case physics::Direction::EAST:       return position + physics::Vector(-1., -1.);
+            case physics::Direction::NORTH_EAST: return position + physics::Vector(-1., 0.);
+            case physics::Direction::NORTH:      return position + physics::Vector(-1., 1.);
+            case physics::Direction::NORTH_WEST: return position + physics::Vector(0., 1.);
+            case physics::Direction::WEST:       return position + physics::Vector(1., 1.);
+            case physics::Direction::SOUTH_WEST: return position + physics::Vector(1., 0.);
+            case physics::Direction::SOUTH:      return position + physics::Vector(1., -1.);
+            case physics::Direction::SOUTH_EAST: return position + physics::Vector(0., -1.);
+            default:                             return position + physics::Vector(-1., 1.);
+        }
+    }
+
+    physics::Vector right_tail_position(const physics::Direction direction, const physics::Vector& position) const {
+        switch(direction) {
+            case physics::Direction::EAST:       return position + physics::Vector(-1., 1.);
+            case physics::Direction::NORTH_EAST: return position + physics::Vector(0., 1.);
+            case physics::Direction::NORTH:      return position + physics::Vector(1., 1.);
+            case physics::Direction::NORTH_WEST: return position + physics::Vector(1., 0.);
+            case physics::Direction::WEST:       return position + physics::Vector(1., -1.);
+            case physics::Direction::SOUTH_WEST: return position + physics::Vector(0., -1.);
+            case physics::Direction::SOUTH:      return position + physics::Vector(-1., -1.);
+            case physics::Direction::SOUTH_EAST: return position + physics::Vector(-1., 0.);
+            default:                             return position + physics::Vector(1., 1.);
+        }
     }
 
     void draw_self(std::vector<uint8_t>& graphics) override {
         if(this->team != Team::TEAM_RED) return;
         const auto position = this->get_position();
         const auto color = this->get_color();
-        const auto angle = this->get_angle();
-        const auto left_tail_position = this->left_tail_position(angle, position);
-        const auto right_tail_position = this->right_tail_position(angle, position);
+        const auto direction = this->get_direction();
+        const auto left_tail_position = this->left_tail_position(direction, position);
+        const auto right_tail_position = this->right_tail_position(direction, position);
 
         if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
             return;

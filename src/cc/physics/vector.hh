@@ -1,7 +1,10 @@
-#include <random>
+#include <cmath>
+#include <cstdio>
+#include <compare>
 
 #pragma once
 namespace physics {
+
 class Vector {
    public:
     double x = 0.;
@@ -55,4 +58,5 @@ class Vector {
         return Vector{max_x * rx, max_y * ry};
     }
 };
+
 }  // namespace physics
