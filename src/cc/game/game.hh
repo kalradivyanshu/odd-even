@@ -76,7 +76,7 @@ class Game {
         p1->set_position(physics::Vector(10., 40.));
         auto pickup = std::make_unique<Pickup>(physics::Vector(60., 60.));
 
-        this->world.add_entity(std::move(pickup));
+        // this->world.add_entity(std::move(pickup));
 
         // auto p2 = std::make_unique<Player>(Team::TEAM_BLUE);
         // this->p2_id = p2->get_id();
