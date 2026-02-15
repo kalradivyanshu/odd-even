@@ -231,7 +231,13 @@ The problem right now is that the player looks bad. Its just a dot. I sketched t
 
 ![player_2d](artifacts/player_2d.png)
 
-Its 8 different shapes, depending on where the player is pointed. The player is the origin, and it must point towards the cursor. So the angle is:
+I know I wrote this as a rule:
+
+> 3. Each object will be exactly one pixel, ofcourse I can figure out the complex physics of multi-cell rigid body, but I dont want to 😤
+
+But fuck that rule. We will do this.
+
+The player is 8 different shapes, depending on where it is pointed. The player is the origin, and it must point towards the cursor. So the angle is:
 
 $$v = v_c - v_p$$
 
