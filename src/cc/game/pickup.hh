@@ -15,6 +15,8 @@ class Pickup : public physics::Entity {
         this->set_position(position);
         this->entity_type = "Pickup";
         this->on_collision = [this](physics::Entity* e) { this->on_pickup(e); };
+        this->radius = 2.0;
+        this->mass = 0.0;
     }
 
     void increment_animation_frame() {

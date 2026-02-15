@@ -24,6 +24,7 @@ class Player : public physics::Spring {
         }
         this->entity_type = "Player";
         this->on_collision = [this](physics::Entity* e) { this->on_bullet_collision(e); };
+        this->radius = 1.5;
     }
 
     void on_bullet_collision(physics::Entity* e) {
@@ -124,8 +125,8 @@ class Player : public physics::Spring {
             diff = physics::Vector(20., 0.);
         }
         auto vel = diff;
-        pos.x += 1.;
-        pos.y += 1.;
+        pos.x += 5.;
+        pos.y += 5.;
 
         auto solid = std::make_unique<physics::Bullet>(pos);
         solid->update_velocity(vel);

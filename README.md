@@ -436,4 +436,36 @@ Not the prettiest code in the world, but hey, it works!
 Will probably need to rework this, because honestly, even for me, this is ass quality code. But thats for future me. Fuck future me.
 
 
+# 2D collisions
 
+See the problem right now is that the player is a lot bigger than one point and the pickup is too. But they only react if the top of the player hits the center of the pickup. Which sucks. You have to fly by the pickup mutliple times to hit it at the exact right spot, this is bad.
+
+![1d_collision_issue](/artifacts/1d_collision_issue.gif)
+
+Well, we will need to figure out 2D collisions. Damn it. Ok, so the math says that this is the updated velocities of 2 circles after collision:
+
+**1. Unit Normal Vector ($n$):**
+
+$$n = \frac{x_1 - x_2}{|x_1 - x_2|}$$
+
+**2. Relative Velocity Normal Component ($v_{rel}$):**
+
+$$v_{rel} = \frac{(v_2 - v_1) \cdot n}{n}$$
+
+**3. New Velocities:**
+
+1. $$v_1' = v_1 + \frac{2m_2}{m_1 + m_2} ((v_2 - v_1) \cdot n)n$$
+
+2. $$v_2' = v_2 + \frac{2m_1}{m_1 + m_2} ((v_1 - v_2) \cdot n)n$$
+
+Thats too complicated for my whee little brain. So I cheated. I detect the collision by checking if the distance between circles is smaller than the sum of their radii (radiuses? radie? radies? idk.).
+
+```C++
+auto distance_bw_centers = this->position - other->position;
+auto radius_sum = this->radius + other->radius;
+bool did_collide = distance_bw_centers.get_magnitude() <= radius_sum;
+```
+
+But I left the reaction to the collision the same. I can't be bothered, specially because most of the collisions will be between bullets, that stay unchanged, when the player hits a pickup, it's momentum must not change, since pickup is of mass = 0. So ¯\_(ツ)_/¯.
+
+![new_collision](/artifacts/new_collision.gif)

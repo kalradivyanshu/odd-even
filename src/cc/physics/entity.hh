@@ -30,6 +30,7 @@ class Entity {
     Vector force;
     double id = (double)rand() / (double)RAND_MAX;
     graphics::Color color = graphics::Color(255, 255, 255);
+    double radius = 0.0;
 
    public:
     virtual ~Entity() = default;
@@ -113,20 +114,20 @@ class Entity {
     }
 
     void bound_collisions() {
-        if (this->position.x < 0) {
-            this->position.x = 0;
+        if (this->position.x < this->radius) {
+            this->position.x = this->radius;
             this->velocity.x = -this->velocity.x;
         }
-        if (this->position.x >= 80) {
-            this->position.x = 79;
+        if (this->position.x >= 80 - this->radius) {
+            this->position.x = 79 - this->radius;
             this->velocity.x = -this->velocity.x;
         }
-        if (this->position.y < 0) {
-            this->position.y = 0;
+        if (this->position.y < this->radius) {
+            this->position.y = this->radius;
             this->velocity.y = -this->velocity.y;
         }
-        if (this->position.y >= 80) {
-            this->position.y = 79;
+        if (this->position.y >= 80 - this->radius) {
+            this->position.y = 79 - this->radius;
             this->velocity.y = -this->velocity.y;
         }
     }
@@ -134,18 +135,31 @@ class Entity {
     void react_to_collision(double m_a, const Vector& v_a_0) {
         auto v_b_0 = this->velocity;
         this->velocity = v_a_0 * (2 * m_a / (this->mass + m_a)) + v_b_0 * (this->mass - m_a) / (this->mass + m_a);
+
+        //update position to 50ms * velocity so that the object moves away from the collision point
+        this->position = this->position + this->velocity * 0.05;
     }
 
     bool did_collide(Entity* other) {
-        bool did_collide = this->position.compare_discreet(other->position);
-        if (did_collide) {
+        bool did_collide = false;
+        if(this->radius == 0.0 && other->radius == 0.0)
+            did_collide = this->position.compare_discreet(other->position);
+        else {
+            auto distance_bw_centers = this->position - other->position;
+            auto radius_sum = this->radius + other->radius;
+            did_collide = distance_bw_centers.get_magnitude() <= radius_sum;
+        }
+        if (did_collide && this->mass > 0.0 && other->mass > 0.0) {
             auto v_b_0 = this->velocity;
             this->react_to_collision(other->mass, other->velocity);
             other->react_to_collision(this->mass, v_b_0);
+        }
+        if (did_collide) {
             this->on_collision(other);
             other->on_collision(this);
         }
         return did_collide;
+
     }
 
     virtual void tick(double elapsed, double time_ms) = 0;

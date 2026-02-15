@@ -46,6 +46,11 @@ class Vector {
         return ceil(x) == ceil(other.x) && ceil(y) == ceil(other.y);
     }
 
+    Vector get_normal(const Vector& other) const {
+        const auto num = *this - other;
+        return num / num.get_magnitude();
+    }
+
     void print() const {
         printf("x: %f\n", x);
         printf("y: %f\n", y);
