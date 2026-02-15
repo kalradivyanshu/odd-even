@@ -324,3 +324,110 @@ Now adding back the movement:
 
 Neat.
 
+# Animation
+
+I want the bullets to be acquired by pickup. So naturally I want a pickup collision animation. I drew this simple 4 frame animation:
+
+![pickup_animation](/artifacts/animation.png)
+
+The top is the default/static state. So seems simple, I just hardcoded all the values:
+
+```C++
+void increment_animation_frame() {
+  //this makes sure that the animation takes 800ms to complete.
+  if((this->current_time - this->last_animation_frame_time) >= 200.) {
+      this->frame++;
+      this->last_animation_frame_time = this->current_time;
+  }
+}
+
+void draw_animation_first_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+  const auto color = graphics::GREEN;
+  graphics[(int)position.x + (int)position.y * 80] = color.to_color_u8();
+  this->increment_animation_frame();
+  return;
+}
+
+void draw_animation_second_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+  const auto color = graphics::GREEN;
+  graphics[(int)position.x - 1 + (int)(position.y - 1) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 1 + (int)(position.y - 1) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 1 + (int)(position.y + 1) * 80] = color.to_color_u8();
+  graphics[(int)position.x - 1 + (int)(position.y + 1) * 80] = color.to_color_u8();
+  this->increment_animation_frame();
+  return;
+}
+
+void draw_animation_third_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+  const auto color = graphics::GREEN;
+  graphics[(int)position.x - 1 + (int)(position.y - 1) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 1 + (int)(position.y - 1) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 1 + (int)(position.y + 1) * 80] = color.to_color_u8();
+  graphics[(int)position.x - 1 + (int)(position.y + 1) * 80] = color.to_color_u8();
+  graphics[(int)position.x - 2 + (int)(position.y - 2) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 2 + (int)(position.y - 2) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 2 + (int)(position.y + 2) * 80] = color.to_color_u8();
+  graphics[(int)position.x - 2 + (int)(position.y + 2) * 80] = color.to_color_u8();
+  this->increment_animation_frame();
+  return;
+}
+
+void draw_animation_fourth_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+  const auto color = graphics::GREEN;
+  graphics[(int)position.x - 2 + (int)(position.y - 2) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 2 + (int)(position.y - 2) * 80] = color.to_color_u8();
+  graphics[(int)position.x + 2 + (int)(position.y + 2) * 80] = color.to_color_u8();
+  graphics[(int)position.x - 2 + (int)(position.y + 2) * 80] = color.to_color_u8();
+  this->increment_animation_frame();
+  return;
+}
+
+void draw_self(std::vector<uint8_t>& graphics) override {
+  const auto position = this->get_position();
+  const auto color = graphics::GREEN;
+  if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
+      return;
+  }
+  // printf("Pickup Position: (%f, %f)\n", position.x, position.y);
+  if(this->frame == 0) {
+      graphics[(int)position.x + (int)position.y * 80] = color.to_color_u8();
+      graphics[(int)position.x + 1 + (int)position.y * 80] = color.to_color_u8();
+      graphics[(int)position.x - 1 + (int)position.y * 80] = color.to_color_u8();
+
+      graphics[(int)position.x + (int)(position.y + 1) * 80] = color.to_color_u8();
+      graphics[(int)position.x + (int)(position.y - 1) * 80] = color.to_color_u8();
+  }
+  if(this->frame == 1) {
+      this->draw_animation_first_frame(graphics, position);
+  }
+  if(this->frame == 2) {
+      this->draw_animation_second_frame(graphics, position);
+  }
+  if(this->frame == 3) {
+      this->draw_animation_third_frame(graphics, position);
+  }
+  if(this->frame == 4) {
+      this->draw_animation_fourth_frame(graphics, position);
+  }
+  return;
+}
+```
+
+and when it collides, the animation is kicked off via the `on_collision` callback of entity:
+
+```C++
+void on_collision(physics::Entity* e) {        
+  if(this->frame != 0) return;
+
+  printf("Pickup was picked up by %s\n", e->entity_type.c_str());
+  this->increment_animation_frame();
+}
+```
+Not the prettiest code in the world, but hey, it works!
+
+![pickup_animation](/artifacts/pickup_animation.gif)
+
+Will probably need to rework this, because honestly, even for me, this is ass quality code. But thats for future me. Fuck future me.
+
+
+

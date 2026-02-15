@@ -102,9 +102,7 @@ class Pickup : public physics::Entity {
         this->set_position(this->static_position);
     }
 
-    void on_pickup(physics::Entity* e) {
-        printf("Pickup was picked up by %s\n", e->entity_type.c_str());
-        
+    void on_pickup(physics::Entity* e) {        
         if(this->frame != 0) return;
 
         printf("Pickup was picked up by %s\n", e->entity_type.c_str());
