@@ -59,6 +59,12 @@ class World {
                     continue;
                 }
                 std::string collision_key = std::format("{}:{}", id1, id2);
+                // printf("Entity types: %s, %s\n", entity1->entity_type.c_str(), entity2->entity_type.c_str());
+
+                // if(entity1->entity_type == "Player" && entity2->entity_type == "Pickup") {
+                //     printf("Player position: %f, %f", entity1->get_position().x, entity1->get_position().y);
+                //     printf(" Pickup position: %f, %f\n", entity2->get_position().x, entity2->get_position().y);
+                // }
 
                 bool did_collide = entity1->did_collide(entity2.get());
                 flag |= did_collide;

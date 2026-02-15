@@ -78,11 +78,13 @@ class Game {
 
         this->world.add_entity(std::move(pickup));
 
-        auto p2 = std::make_unique<Player>(Team::TEAM_BLUE);
-        this->p2_id = p2->get_id();
+        // auto p2 = std::make_unique<Player>(Team::TEAM_BLUE);
+        // this->p2_id = p2->get_id();
+
+        // p2->set_position(physics::Vector(60., 10.));
 
         this->world.add_entity(std::move(p1));
-        this->world.add_entity(std::move(p2));
+        // this->world.add_entity(std::move(p2));
     }
 };
 

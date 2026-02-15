@@ -143,6 +143,7 @@ class Entity {
             this->react_to_collision(other->mass, other->velocity);
             other->react_to_collision(this->mass, v_b_0);
             this->on_collision(other);
+            other->on_collision(this);
         }
         return did_collide;
     }
