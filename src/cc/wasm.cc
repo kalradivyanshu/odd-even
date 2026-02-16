@@ -31,6 +31,18 @@ uintptr_t get_graphics(uintptr_t world) {
     return (uintptr_t)(((game::Game*)world)->world.get_graphics());
 }
 
+uintptr_t get_compressed_graphics(uintptr_t world) {
+    return (uintptr_t)(((game::Game*)world)->world.get_compressed_graphics());
+}
+
+uint32_t compress_graphics(uintptr_t world) {
+    return (uint32_t)((game::Game*)world)->world.compress_graphics();
+}
+
+void decompress_graphics(uintptr_t world, size_t compressed_size) {
+    ((game::Game*)world)->world.decompress_graphics(compressed_size);
+}
+
 double get_average_fps(uintptr_t world) {
     auto g = ((game::Game*)world);
     return g->world.get_average_fps();
@@ -48,4 +60,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("shoot", &shoot);
     function("get_average_fps", &get_average_fps);
     function("get_world_size", &get_world_size);
+    function("get_compressed_graphics", &get_compressed_graphics);
+    function("compress_graphics", &compress_graphics);
+    function("decompress_graphics", &decompress_graphics);
 }

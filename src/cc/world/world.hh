@@ -17,6 +17,7 @@ namespace world {
 class World {
     std::map<double, std::unique_ptr<physics::Entity>> entities = {};
     std::vector<uint8_t> word_graphics = std::vector<uint8_t>(WORLD_SIZE * WORLD_SIZE);
+    std::vector<uint8_t> compressed_graphics = std::vector<uint8_t>(WORLD_SIZE * WORLD_SIZE);
     double last_tick_time = 0;
     double average_fps = 0;
 
@@ -58,9 +59,6 @@ class World {
         for (auto& [id, entity] : entities) {
             entity->draw_self(word_graphics);
         }
-
-        auto compressed = compress(word_graphics);
-        printf("Compressed size: %zu\n", compressed.size());
     }
 
     bool did_any_collide() {
@@ -88,6 +86,18 @@ class World {
 
     uint8_t* get_graphics() {
         return word_graphics.data();
+    }
+
+    uint8_t* get_compressed_graphics() {
+        return compressed_graphics.data();
+    }
+
+    void decompress_graphics(size_t compressed_size) {
+        decompress(compressed_graphics, word_graphics, compressed_size);
+    }
+
+    uLongf compress_graphics() {
+        return compress(word_graphics, compressed_graphics);
     }
 };
 }  // namespace world

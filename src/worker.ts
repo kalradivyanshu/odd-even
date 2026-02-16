@@ -90,8 +90,74 @@ const initialize = async function (ctx: OffscreenCanvasRenderingContext2D, width
         }
       }
     }
+    const compressed_size = wasm.compress_graphics(world);
+    const compressed_graphics = wasm.get_compressed_graphics(world);
+    const compressed_arr = new Uint8Array(wasm.HEAPU8.buffer, compressed_graphics, compressed_size);
+    (self as any).data_channel.send(compressed_arr);
   }, 33);
   // Draw the grid
+};
+
+const remote_initialize = async function (ctx: OffscreenCanvasRenderingContext2D, width: number, height: number, data_channel: RTCDataChannel) {
+  let wasm = await InitWasm();
+  let world = wasm.new_world();
+
+  //@ts-ignore
+  self.world = world;
+  //@ts-ignore
+  self.wasm = wasm;
+
+  const worldSize = wasm.get_world_size();
+  // paint the entire canvas black
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, width, height);
+
+  // Set the fill style to white for the squares
+  ctx.fillStyle = "white";
+
+  let total_bytes_received = 0;
+  let last_time = Date.now();
+  let average_bandwidth = 0;
+
+  setInterval(() => {
+    const current_time = Date.now();
+    const time_diff = (current_time - last_time) / 1000;
+    last_time = current_time;
+    const current_bandwidth = total_bytes_received * 8 / (time_diff * 1000);
+    average_bandwidth = (average_bandwidth * 0.9) + (current_bandwidth * 0.1);
+    (self as any).message_port.postMessage({ type: "network", bandwidth: average_bandwidth });
+    total_bytes_received = 0;
+
+  }, 1000);
+
+  data_channel.onmessage = (event) => {
+    const compressed_ptr = wasm.get_compressed_graphics(world);
+    const compressed_arr = new Uint8Array(event.data);
+    wasm.HEAPU8.set(compressed_arr, compressed_ptr);
+    wasm.decompress_graphics(world, event.data.byteLength);
+    let graphics = wasm.get_graphics(world);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "white";
+    let arr = new Uint8Array(wasm.HEAPU8.buffer, graphics, worldSize * worldSize);
+    for (let x = 0; x < width; x += cellSize) {
+      for (let y = 0; y < height; y += cellSize) {
+        let index = x / cellSize + (y / cellSize) * worldSize;
+        if (index >= worldSize * worldSize) {
+          throw new Error("Index out of bounds");
+        }
+        if (arr[index] == 0) {
+          ctx.fillStyle = "black";
+        } else {
+          ctx.fillStyle = from_color_u8(arr[index]);
+        }
+        if (arr[index] != 0) {
+          ctx.fillRect(x, y, cellSize, cellSize);
+        }
+      }
+    }
+    total_bytes_received += event.data.byteLength;
+  }
 };
 
 self.onmessage = (event) => {
@@ -101,7 +167,17 @@ self.onmessage = (event) => {
             const ctx = canvas.getContext("2d")!;
             //@ts-ignore
             self.message_port = event.data.port;
+            //@ts-ignore
+            self.data_channel = event.data.data_channel;
             initialize(ctx, event.data.width, event.data.height);
+            break;
+        case "remote_initialize":
+            const data_channel = event.data.data_channel;
+            const canvas_: OffscreenCanvas = event.data.ctx;
+            const ctx_ = canvas_.getContext("2d")!;
+            //@ts-ignore
+            self.message_port = event.data.port;
+            remote_initialize(ctx_, event.data.width, event.data.height, data_channel);
             break;
         case "mousemove":
             coordinate(event.data.x, event.data.y, event.data.rect);

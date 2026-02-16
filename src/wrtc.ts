@@ -116,7 +116,7 @@ export class WRTCHandshake {
   async waitForOpponent(
     roomID?: string,
     pollInterval = 1000,
-    timeout = 60000,
+    timeout = 3600000,
   ): Promise<void> {
     this.assertMode("offerer");
 
