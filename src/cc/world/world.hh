@@ -9,6 +9,8 @@
 
 #include "physics/entity.hh"
 #include "world/global.hh"
+#include "world/compress.hh"
+
 #pragma once
 
 namespace world {
@@ -56,6 +58,9 @@ class World {
         for (auto& [id, entity] : entities) {
             entity->draw_self(word_graphics);
         }
+
+        auto compressed = compress(word_graphics);
+        printf("Compressed size: %zu\n", compressed.size());
     }
 
     bool did_any_collide() {

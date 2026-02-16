@@ -1,7 +1,7 @@
 #include <cstdint>
 namespace graphics {
 
-uint8_t scale_down_to_16bit(uint8_t x) {
+inline uint8_t scale_down_to_16bit(uint8_t x) {
     return x >> 4;
 }
 
@@ -29,5 +29,6 @@ const Color RED = Color(255, 0, 0);
 const Color GREEN = Color(0, 255, 0);
 const Color BLUE = Color(0, 0, 255);
 const Color ORANGE = Color(255, 165, 0);
+const Color WHITE = Color(255, 255, 255);
 
 }  // namespace graphics
