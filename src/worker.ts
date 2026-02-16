@@ -1,0 +1,115 @@
+import InitWasm from "./cc/compiled/wasm_core";
+import { wasm_ty } from "./cc/compiled/wasm_types";
+
+// Define the size of each cell
+const cellSize = 5;
+
+function coordinate(x: number, y: number, rect: {left: number, top: number}) {
+  //@ts-ignore
+  let wasm: wasm_ty = self.wasm;
+  //@ts-ignore
+  let world: number = self.world;
+   
+  wasm.setup_spring_center(world, (x - rect.left) / cellSize, (y - rect.top) / cellSize);
+}
+
+let bullets = 0;
+
+async function shoot(x: number, y: number, rect: {left: number, top: number}) {
+  for(let i = 0; i < 10; i++) {
+    
+    //@ts-ignore
+    let wasm: wasm_ty = self.wasm;
+    //@ts-ignore
+    let world: number = self.world;
+
+    wasm.shoot(world, (x - rect.left) / 10, (y - rect.top) / 10);
+    await new Promise(resolve => setTimeout(resolve, 200));
+    bullets++;
+  }
+}
+
+
+
+// static Color from_color_u8(uint8_t color) {
+//   return Color((color & 0b00110000) << 4, (color & 0b00001100) << 2, color & 0b00000011);
+// }
+
+function from_color_u8(color: number): string {
+  let r = (color & 0b00110000) >> 4;
+  let g = (color & 0b00001100) >> 2;
+  let b = color & 0b00000011;
+  return `rgb(${r * 85}, ${g * 85}, ${b * 85})`;
+}
+
+
+const initialize = async function (ctx: OffscreenCanvasRenderingContext2D, width: number, height: number) {
+  let wasm = await InitWasm();
+  let world = wasm.new_world();
+
+  //@ts-ignore
+  self.world = world;
+  //@ts-ignore
+  self.wasm = wasm;
+
+  const worldSize = wasm.get_world_size();
+
+
+
+  // paint the entire canvas black
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, width, height);
+
+  // Set the fill style to white for the squares
+  ctx.fillStyle = "white";
+  setInterval(() => {
+    //@ts-ignore
+    self.message_port.postMessage({ type: "fps", fps: wasm.get_average_fps(world), bullets: bullets });
+  }, 1000);
+
+  setInterval(() => {
+    wasm.tick(world);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "white";
+    let graphics = wasm.get_graphics(world);
+    let arr = new Uint8Array(wasm.HEAPU8.buffer, graphics, worldSize * worldSize);
+    for (let x = 0; x < width; x += cellSize) {
+      for (let y = 0; y < height; y += cellSize) {
+        let index = x / cellSize + (y / cellSize) * worldSize;
+        if (index >= worldSize * worldSize) {
+          throw new Error("Index out of bounds");
+        }
+        if (arr[index] == 0) {
+          ctx.fillStyle = "black";
+        } else {
+          ctx.fillStyle = from_color_u8(arr[index]);
+        }
+        if (arr[index] != 0) {
+          ctx.fillRect(x, y, cellSize, cellSize);
+        }
+      }
+    }
+  }, 33);
+  // Draw the grid
+};
+
+self.onmessage = (event) => {
+    switch(event.data.type) {
+        case "initialize":
+            const canvas: OffscreenCanvas = event.data.ctx;
+            const ctx = canvas.getContext("2d")!;
+            //@ts-ignore
+            self.message_port = event.data.port;
+            initialize(ctx, event.data.width, event.data.height);
+            break;
+        case "mousemove":
+            coordinate(event.data.x, event.data.y, event.data.rect);
+            break;
+        case "click":
+            shoot(event.data.x, event.data.y, event.data.rect);
+            break;
+    }
+
+
+}

@@ -23,13 +23,13 @@ class Player : public physics::Spring {
             this->set_position(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.));
             this->set_color(graphics::BLUE);
         }
-        this->entity_type = "Player";
+        this->entity_type = physics::EntityType::PLAYER;
         this->on_collision = [this](physics::Entity* e) { this->on_bullet_collision(e); };
         this->radius = 1.5;
     }
 
     void on_bullet_collision(physics::Entity* e) {
-        if (e->entity_type == "Bullet") {
+        if (e->entity_type == physics::EntityType::BULLET) {
             auto bullet = dynamic_cast<physics::Bullet*>(e);
             if (bullet->team != this->team) {
                 printf("Player %s was hit by a bullet\n", this->team == Team::TEAM_RED ? "RED" : "BLUE");

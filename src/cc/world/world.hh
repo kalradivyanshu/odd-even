@@ -68,6 +68,10 @@ class World {
                     j++;
                     continue;
                 }
+                if(entity1->entity_type == physics::EntityType::BULLET && entity2->entity_type == physics::EntityType::BULLET) {
+                    j++;
+                    continue;
+                }
                 bool did_collide = entity1->did_collide(entity2.get());
                 flag |= did_collide;
                 j++;

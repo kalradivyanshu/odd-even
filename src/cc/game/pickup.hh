@@ -14,7 +14,7 @@ class Pickup : public physics::Entity {
     Pickup(physics::Vector position) {
         this->static_position = position;
         this->set_position(position);
-        this->entity_type = "Pickup";
+        this->entity_type = physics::EntityType::PICKUP;
         this->on_collision = [this](physics::Entity* e) { this->on_pickup(e); };
         this->radius = 2.0;
         this->mass = 0.0;
@@ -108,7 +108,6 @@ class Pickup : public physics::Entity {
     void on_pickup(physics::Entity* e) {        
         if(this->frame != 0) return;
 
-        printf("Pickup was picked up by %s\n", e->entity_type.c_str());
         this->increment_animation_frame();
     }
 };

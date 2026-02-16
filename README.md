@@ -531,3 +531,25 @@ did_collide = distance_bw_centers.get_magnitude() <= radius_sum;
 And just like that, we are hitting a much better 12 - 14fps, not great, but 6x better than before:
 
 ![aabb_approx](/artifacts/aabb_approx.gif)
+
+
+Well, we can improve things A LOT, by disabling checking for bullet bullet collision. And just like that:
+
+![bullet_disable_string](/artifacts/bullet_bullet_disable_string.gif)
+
+We have 0 fps? Wait, what?
+
+After a few minutes of what the fuck, I realised the culprit is string comparision, right now entity type is string, so I had this in the collision code:
+
+```C++
+if(entity1->entity_type == "Bullet" && entity2->entity_type == "Bullet") {
+  j++;
+  continue;
+}
+```
+
+Changing entity type to ENUM, fixes this, and makes it a lot faster:
+
+![bullet_bullet_disable](/artifacts/bullet_bullet_disable.gif)
+
+Look ma! 30fps. I also moved the canvas to [an offscreen worker](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), to ensure that [main thread fuckery](https://www.youtube.com/watch?v=7Rrv9qFMWNM) doesn't hurt me.

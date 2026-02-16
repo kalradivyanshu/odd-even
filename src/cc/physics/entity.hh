@@ -21,6 +21,12 @@ enum Direction {
     SOUTH_WEST,
 };
 
+enum EntityType {
+    BULLET,
+    PLAYER,
+    PICKUP,
+};
+
 class Entity {
    protected:
     Vector last_position;
@@ -35,7 +41,7 @@ class Entity {
 
    public:
     virtual ~Entity() = default;
-    std::string entity_type = "Entity";
+    EntityType entity_type = EntityType::BULLET;
 
     std::function<void(Entity*)> on_collision = [](Entity* e) {};
 
@@ -146,8 +152,8 @@ class Entity {
         auto y1 = this->position.y;
         auto x2 = other->position.x;
         auto y2 = other->position.y;
-        auto r1 = this->radius * 2;
-        auto r2 = other->radius * 2;
+        auto r1 = this->radius * 1.5;
+        auto r2 = other->radius * 1.5;
         
         return (
             x1 < x2 + r2 &&

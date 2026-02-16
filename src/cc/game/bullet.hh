@@ -10,7 +10,7 @@ class Bullet : public Entity {
 
     Bullet(Vector position) {
         this->set_position(position);
-        this->entity_type = "Bullet";
+        this->entity_type = physics::EntityType::BULLET;
     }
 
     void stabilize_velocity() {
