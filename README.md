@@ -460,12 +460,16 @@ $$v_{rel} = \frac{(v_2 - v_1) \cdot n}{n}$$
 
 Thats too complicated for my whee little brain. So I cheated. I detect the collision by checking if the distance between circles is smaller than the sum of their radii (radiuses? radie? radies? idk.).
 
+$$\lvert{\vec{c_a} - \vec{c_b}}\rvert \le r_a - r_b$$
+
+
+
 ```C++
 auto distance_bw_centers = this->position - other->position;
 auto radius_sum = this->radius + other->radius;
 bool did_collide = distance_bw_centers.get_magnitude() <= radius_sum;
 ```
 
-But I left the reaction to the collision the same. I can't be bothered, specially because most of the collisions will be between bullets, that stay unchanged, when the player hits a pickup, it's momentum must not change, since pickup is of mass = 0. So ¯\_(ツ)_/¯.
+But I left the reaction to the collision the same. I can't be bothered, specially because most of the collisions will be between bullets, that stay unchanged, when the player hits a pickup, it's momentum must not change, since pickup is of mass = 0. So ¯\\\_(ツ)_/¯.
 
 ![new_collision](/artifacts/new_collision.gif)
