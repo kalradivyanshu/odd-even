@@ -13,6 +13,8 @@
         height: 100vh;
         margin: 0;
         background-color: black;
+        color: white;
+        flex-direction: column;
       }
       canvas {
         border: solid 1px white;
@@ -20,6 +22,7 @@
     </style>
   </head>
   <body>
+    <span id="averageFps"></span><br>
     <canvas id="gridCanvas" width="800" height="800"></canvas>
     <script src="src/main.ts" type="module"></script>
     <script src="src/cc/compiled/wasm_core.js" type="module"></script>

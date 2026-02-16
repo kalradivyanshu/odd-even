@@ -8,13 +8,15 @@
 #include <vector>
 
 #include "physics/entity.hh"
+#include "world/global.hh"
 #pragma once
 
 namespace world {
 class World {
     std::map<double, std::unique_ptr<physics::Entity>> entities = {};
-    std::vector<uint8_t> word_graphics = std::vector<uint8_t>(80 * 80);
+    std::vector<uint8_t> word_graphics = std::vector<uint8_t>(WORLD_SIZE * WORLD_SIZE);
     double last_tick_time = 0;
+    double average_fps = 0;
 
    public:
     World(double time_ms) {
@@ -33,8 +35,16 @@ class World {
         entities.erase(id);
     }
 
+    double get_average_fps() const {
+        return this->average_fps;
+    }
+
     void tick(double time_ms) {
-        std::memset(word_graphics.data(), 0, 80 * 80);
+        std::memset(word_graphics.data(), 0, WORLD_SIZE * WORLD_SIZE);
+
+        double average_fps = 1000. / (time_ms - this->last_tick_time);
+        this->average_fps = (this->average_fps * 0.9) + (average_fps * 0.1);
+
         while (this->last_tick_time < time_ms) {
             this->did_any_collide();
             for (auto& [id, entity] : entities) {
@@ -58,14 +68,6 @@ class World {
                     j++;
                     continue;
                 }
-                std::string collision_key = std::format("{}:{}", id1, id2);
-                // printf("Entity types: %s, %s\n", entity1->entity_type.c_str(), entity2->entity_type.c_str());
-
-                // if(entity1->entity_type == "Player" && entity2->entity_type == "Pickup") {
-                //     printf("Player position: %f, %f", entity1->get_position().x, entity1->get_position().y);
-                //     printf(" Pickup position: %f, %f\n", entity2->get_position().x, entity2->get_position().y);
-                // }
-
                 bool did_collide = entity1->did_collide(entity2.get());
                 flag |= did_collide;
                 j++;

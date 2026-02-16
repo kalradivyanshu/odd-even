@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <compare>
 
+#include "world/global.hh"
+
 #pragma once
 namespace physics {
 
@@ -57,7 +59,7 @@ class Vector {
         printf("\n");
     }
 
-    static Vector random(double max_x = 80., double max_y = 80.) {
+    static Vector random(double max_x = world::WORLD_SIZE, double max_y = world::WORLD_SIZE) {
         double rx = (double)rand() / (double)RAND_MAX;
         double ry = (double)rand() / (double)RAND_MAX;
         return Vector{max_x * rx, max_y * ry};

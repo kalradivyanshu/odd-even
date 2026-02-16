@@ -59,13 +59,9 @@ class Game {
 
     void shoot(double x, double y) {
         auto p = this->get_p1();
-
         auto bullet = std::move(p->shoot(x, y));
-
         auto bullet_id = bullet->get_id();
-
         this->world.add_entity(std::move(bullet));
-
         this->add_bullet(bullet_id);
     }
 

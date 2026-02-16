@@ -473,3 +473,61 @@ bool did_collide = distance_bw_centers.get_magnitude() <= radius_sum;
 But I left the reaction to the collision the same. I can't be bothered, specially because most of the collisions will be between bullets, that stay unchanged, when the player hits a pickup, it's momentum must not change, since pickup is of mass = 0. So ¯\\\_(ツ)_/¯.
 
 ![new_collision](/artifacts/new_collision.gif)
+
+
+# 30 fps baby!
+
+I made the world bigger, by increasing the world size from 80x80 to 160x160, and reducing the cell size to 5. It looks a lot better and smoother, and this will ensure the game actually lasts a while, rather than getting over fairly quickly.
+
+I added an fps counter, and it seems to be looking good:
+
+![30fps](/artifacts/30fps_bigger_world.gif)
+
+The problem is that when there are a lot of bullets, say 190, it starts to crawl down to less than 3 fps. We can definitly do a lot better.
+
+![crawl](/artifacts/slow_down.gif)
+
+The obvious suspect is the collision detection, its running every 33ms and comparing the player to every bullet. The comparision of bullets with each other is actually pretty fast, since its just checking if they are in the same cell or not. Calculating the distance from the center of the player's cell is a lot.
+
+We need some way to only compare the bullets that are "near" the player. But how do we define near?
+
+This is where AABB comes into play. AABB stands for Axis-Aligned Bounding Box. You basically draw a box around the player, and check if the box of the other entity overlaps or not. If there is no overlap, they are definitly not colliding, if there is overlap, check the more accurate distance from center.
+
+![aabb](/artifacts/aabb.png)
+
+This works really well because the bounding box are aligned with the axis, and not the player, so simply comparing the x and y coordinate is enough.
+
+To do this in our code base, we can just add a simple approx collision check in entity:
+
+```C++
+bool check_approximate_collision(Entity* other) {
+  auto x1 = this->position.x;
+  auto y1 = this->position.y;
+  auto x2 = other->position.x;
+  auto y2 = other->position.y;
+  auto r1 = this->radius * 2;
+  auto r2 = other->radius * 2;
+  
+  return (
+      x1 < x2 + r2 &&
+      x1 + r1 > x2 &&
+      y1 < y2 + r2 &&
+      y1 + r1 > y2
+  );
+}
+```
+
+and then add this before checking the exact collision:
+
+```C++
+if(!this->check_approximate_collision(other)) return false;
+
+//check exact collision
+auto distance_bw_centers = this->position - other->position;
+auto radius_sum = this->radius + other->radius;
+did_collide = distance_bw_centers.get_magnitude() <= radius_sum;
+```
+
+And just like that, we are hitting a much better 12 - 14fps, not great, but 6x better than before:
+
+![aabb_approx](/artifacts/aabb_approx.gif)

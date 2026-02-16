@@ -4,6 +4,7 @@
 
 #include "physics/vector.hh"
 #include "world/color.hh"
+#include "world/global.hh"
 
 #pragma once
 
@@ -88,11 +89,11 @@ class Entity {
         const auto position = this->get_position();
         const auto color = this->get_color();
 
-        if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
+        if (position.x < 0 || position.x >= world::WORLD_SIZE || position.y < 0 || position.y >= world::WORLD_SIZE) {
             return;
         }
 
-        graphics[(int)position.x + (int)position.y * 80] = color.to_color_u8();
+        graphics[(int)position.x + (int)position.y * world::WORLD_SIZE] = color.to_color_u8();
     }
 
     std::pair<Vector, Vector> get_position_update() {
@@ -118,16 +119,16 @@ class Entity {
             this->position.x = this->radius;
             this->velocity.x = -this->velocity.x;
         }
-        if (this->position.x >= 80 - this->radius) {
-            this->position.x = 79 - this->radius;
+        if (this->position.x >= world::WORLD_SIZE - this->radius) {
+            this->position.x = world::WORLD_SIZE - this->radius - 1;
             this->velocity.x = -this->velocity.x;
         }
         if (this->position.y < this->radius) {
             this->position.y = this->radius;
             this->velocity.y = -this->velocity.y;
         }
-        if (this->position.y >= 80 - this->radius) {
-            this->position.y = 79 - this->radius;
+        if (this->position.y >= world::WORLD_SIZE - this->radius) {
+            this->position.y = world::WORLD_SIZE - this->radius - 1;
             this->velocity.y = -this->velocity.y;
         }
     }
@@ -140,11 +141,30 @@ class Entity {
         this->position = this->position + this->velocity * 0.05;
     }
 
+    bool check_approximate_collision(Entity* other) {
+        auto x1 = this->position.x;
+        auto y1 = this->position.y;
+        auto x2 = other->position.x;
+        auto y2 = other->position.y;
+        auto r1 = this->radius * 2;
+        auto r2 = other->radius * 2;
+        
+        return (
+            x1 < x2 + r2 &&
+            x1 + r1 > x2 &&
+            y1 < y2 + r2 &&
+            y1 + r1 > y2
+        );
+    }
+
     bool did_collide(Entity* other) {
         bool did_collide = false;
         if(this->radius == 0.0 && other->radius == 0.0)
             did_collide = this->position.compare_discreet(other->position);
         else {
+            if(!this->check_approximate_collision(other)) return false;
+
+            //check exact collision
             auto distance_bw_centers = this->position - other->position;
             auto radius_sum = this->radius + other->radius;
             did_collide = distance_bw_centers.get_magnitude() <= radius_sum;

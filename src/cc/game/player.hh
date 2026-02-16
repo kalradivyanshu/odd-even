@@ -2,6 +2,7 @@
 #include "game/team.hh"
 #include "physics/spring.hh"
 #include "physics/vector.hh"
+#include "world/global.hh"
 #include <cmath>
 
 #pragma once
@@ -18,8 +19,8 @@ class Player : public physics::Spring {
             this->set_position(physics::Vector(0., 0.));
             this->set_color(graphics::ORANGE);
         } else {
-            this->setup(physics::Vector(79., 79.), 10, 1.3);
-            this->set_position(physics::Vector(79., 79.));
+            this->setup(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.), 10, 1.3);
+            this->set_position(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.));
             this->set_color(graphics::BLUE);
         }
         this->entity_type = "Player";
@@ -104,13 +105,13 @@ class Player : public physics::Spring {
         const auto left_tail_position = this->left_tail_position(direction, position);
         const auto right_tail_position = this->right_tail_position(direction, position);
 
-        if (position.x < 0 || position.x >= 80 || position.y < 0 || position.y >= 80) {
+        if (position.x < 0 || position.x >= world::WORLD_SIZE || position.y < 0 || position.y >= world::WORLD_SIZE) {
             return;
         }
 
-        graphics[(int)position.x + (int)position.y * 80] = color.to_color_u8();
-        graphics[(int)left_tail_position.x + (int)left_tail_position.y * 80] = color.to_color_u8();
-        graphics[(int)right_tail_position.x + (int)right_tail_position.y * 80] = color.to_color_u8();
+        graphics[(int)position.x + (int)position.y * world::WORLD_SIZE] = color.to_color_u8();
+        graphics[(int)left_tail_position.x + (int)left_tail_position.y * world::WORLD_SIZE] = color.to_color_u8();
+        graphics[(int)right_tail_position.x + (int)right_tail_position.y * world::WORLD_SIZE] = color.to_color_u8();
     }
 
     void move(double x, double y) {
