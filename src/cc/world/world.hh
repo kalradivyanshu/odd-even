@@ -60,9 +60,6 @@ class World {
             entity->draw_self(world_graphics);
         }
 
-        uLongf compressed_size = compress(world_graphics, compressed_graphics);
-        printf("Compressed size: %zu\n", compressed_size);
-        printf("Uncompressed size: %zu\n", world_graphics.size());
     }
 
     bool did_any_collide() {
