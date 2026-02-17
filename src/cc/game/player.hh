@@ -21,7 +21,7 @@ class Player : public physics::Spring {
     Player(Team team) {
         this->team = team;
         if (this->team == Team::TEAM_RED) {
-            this->setup(physics::Vector(10., 10.), 10, 1.3);
+            this->setup(physics::Vector(0., 0.), 10, 3.9);
             this->set_position(physics::Vector(0., 0.));
             this->set_color(graphics::ORANGE);
         } else {
