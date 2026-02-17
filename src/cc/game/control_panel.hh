@@ -46,12 +46,12 @@ class ControlPanel {
             graphics[i + 6 * world::WORLD_SIZE] = graphics::WHITE.to_color_u8();
         }
 
-        for(int i = 0; i < blue_bullets; i++) {
+        for(int i = 0; i < red_bullets; i++) {
             const auto position = physics::Vector(10 + 2 * i, 3);
             graphics[(int)position.x + (int)position.y * world::WORLD_SIZE] = graphics::WHITE.to_color_u8();
         }
 
-        for(int i = 0; i < red_bullets; i++) {
+        for(int i = 0; i < blue_bullets; i++) {
             const auto position = physics::Vector(world::WORLD_SIZE - 10 - (2 * i + 1), 3);
             graphics[(int)position.x + (int)position.y * world::WORLD_SIZE] = graphics::WHITE.to_color_u8();
         }

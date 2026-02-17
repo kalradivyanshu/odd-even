@@ -42,9 +42,11 @@ class Game {
         if (odd) {
             this->switch_bullet_state(Team::TEAM_RED);
             this->get_p1()->mark_as_in_danger();
+            this->get_p2()->mark_as_safe();
         } else {
             this->switch_bullet_state(Team::TEAM_BLUE);
             this->get_p1()->mark_as_safe();
+            this->get_p2()->mark_as_in_danger();
         }
     }
 

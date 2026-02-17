@@ -152,7 +152,6 @@ class Player : public physics::Spring {
     void draw_self(uint8_t* graphics) override {
         this->switch_color();
     
-        if(this->team != Team::TEAM_RED) return;
         const auto position = this->get_position();
         const auto color = this->get_color();
         const auto direction = this->get_direction();
