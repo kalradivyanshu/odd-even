@@ -7,12 +7,24 @@ const RTC_CONFIG: RTCConfiguration = {
     {
       urls: [
         "stun:stun.cloudflare.com:3478",
-        "stun:stun.cloudflare.com:53",
-        "stun:stun.l.google.com:19302"
+        "stun:stun.cloudflare.com:53"
       ]
     },
+    {
+      urls: [
+        "turn:turn.cloudflare.com:3478?transport=udp",
+        "turn:turn.cloudflare.com:3478?transport=tcp",
+        "turns:turn.cloudflare.com:5349?transport=tcp",
+        "turn:turn.cloudflare.com:53?transport=udp",
+        "turn:turn.cloudflare.com:80?transport=tcp",
+        "turns:turn.cloudflare.com:443?transport=tcp"
+      ],
+      username: "g067bbef06b3dc1e6f39d64e1dc42e8d1605b5f11a294032b9f72600405058c2",
+      credential: "fc45a5d0e70e0c6b6bd4676b8dd930fabed501af65e0398522177ff4fbb54a7d"
+    }
   ]
 };
+
 
 // Signaling server URL - update this with your deployed worker URL
 const SIGNALING_SERVER = "https://d1-tutorial.kalradivyanshu.workers.dev"; // or your deployed URL
