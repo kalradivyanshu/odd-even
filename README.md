@@ -553,3 +553,115 @@ Changing entity type to ENUM, fixes this, and makes it a lot faster:
 ![bullet_bullet_disable](/artifacts/bullet_bullet_disable.gif)
 
 Look ma! 30fps. I also moved the canvas to [an offscreen worker](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), to ensure that [main thread fuckery](https://www.youtube.com/watch?v=7Rrv9qFMWNM) doesn't hurt me.
+
+# Networking
+
+Finally we reach the network part. The idea is simple, the physics engine and all the calculations will run on a master computer, and the game state will be sent to the second player.
+
+The game state is the world graphics vector in `src/cc/world/world.hh`
+
+```C++
+std::vector<uint8_t> world_graphics = std::vector<uint8_t>(WORLD_SIZE * WORLD_SIZE);
+```
+
+The `WORLD_SIZE` currently is 160, this means the `world_graphics` vector is approximately 205kb. The problem is that for 30fps to work, this means sending 205kb 30 times ever second. Which comes to 6mbps, which is basically equivalent of streaming 3 1080p full HD videos!
+
+![bullet_bullet_disable](/artifacts/bullet_bullet_disable.gif)
+
+As much as I am [IKEA Effect](https://en.wikipedia.org/wiki/IKEA_effect) boy, even I won't say ^ this is as pretty as 3 full HD videos.
+
+The way we have stored this is, that every element in this vector contains 8 bit representation of a color. If the vector is 0, the color is black. This means when there are 120 bullets, there are about 140ish (120 for bullet, 20 for pickup, player etc.) non zero elements. This means out of `25600` elements, 99.5% are zero! This seems like the perfect usecase for some good old fashioned zlib compression!
+
+```C++
+#include <zlib.h>
+#include <vector>
+#include <stdexcept>
+
+#pragma once
+
+namespace world {
+    uLongf compress(const std::vector<uint8_t>& data, std::vector<uint8_t>& compressed) {
+        uLongf compressed_size = compressBound(data.size());
+
+        int result = compress2(compressed.data(), &compressed_size,
+                            data.data(), data.size(), Z_BEST_COMPRESSION);
+        
+        if (result != Z_OK) {
+            throw std::runtime_error("Compression failed");
+        }
+        
+        return compressed_size;
+    }
+
+    void decompress(const std::vector<uint8_t>& compressed, std::vector<uint8_t>& decompressed, size_t compressed_size) {
+        uLongf decompressed_size = decompressed.size();
+        
+        int result = uncompress(decompressed.data(), &decompressed_size,
+                            compressed.data(), compressed_size);
+        
+        if (result != Z_OK) {
+            throw std::runtime_error("Decompression failed");
+        }
+    }
+}
+```
+
+We just need `zlib.h`, which emscripten provides for us, via `USE_ZLIB=1` flag! We will add this to every tick to check:
+
+```C++
+auto compressed_size = compress(world_graphics, compressed_graphics);
+printf("Compressed size: %zu\n", compressed_size);
+printf("Uncompressed size: %zu\n", world_graphics.size());
+```
+
+And just like that, we can see that when there are 100 bullets, the compressed size is just 200 bytes, which at 30fps is less than 50kbps! ALL HAIL ZLIB!
+
+Now to get this across the network. We will use WebRTC, mostly because I don't want to maintain a server for webtransport.
+
+The idea is simple, the master opens a datachannel, sends compressed graphics on it, the remote listens to this datachannel, and decompresses and draws the state on the canvas.
+
+When the remote moves it's player or shoots, a second datachannel sends these updates to master, so that it can update the game state. This second datachannel also sends RTT and ping/pong messages to maintain lag and latency numbers.
+
+For the first part, lets get the painting and webrtc handshake going. To summarize, the master creates an offer, sends it to an endpoint on cloudflare, and gets a roomID back, on joining the roomID, the remote gets the offer, creates an answer and sends it to another endpoint with the roomID. The master polls a wait for answer endpoint, and gets the answer, and completes the handshake.
+
+Datachannel is opened on the main thread, and then passed to the workers, since now since Chrome 130, datachannels are transferable and supported in [all major browsers](https://wpt.fyi/results/webrtc/transfer-datachannel.html?label=experimental&label=master&aligned)!
+
+I got Opus to write most of the handshake, and cloudflare APIs, because I couldn't be bothered to write webRTC handshakes. Finally, in the worker we get the remote state, uncompress it using wasm, and draw it:
+
+```typescript
+data_channel.onmessage = (event) => {
+  const compressed_ptr = wasm.get_compressed_graphics(world);
+  const compressed_arr = new Uint8Array(event.data);
+  wasm.HEAPU8.set(compressed_arr, compressed_ptr);
+  wasm.decompress_graphics(world, event.data.byteLength);
+  let graphics = wasm.get_graphics(world);
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "white";
+  let arr = new Uint8Array(wasm.HEAPU8.buffer, graphics, worldSize * worldSize);
+  for (let x = 0; x < width; x += cellSize) {
+    for (let y = 0; y < height; y += cellSize) {
+      let index = x / cellSize + (y / cellSize) * worldSize;
+      if (index >= worldSize * worldSize) {
+        throw new Error("Index out of bounds");
+      }
+      if (arr[index] == 0) {
+        ctx.fillStyle = "black";
+      } else {
+        ctx.fillStyle = from_color_u8(arr[index]);
+      }
+      if (arr[index] != 0) {
+        ctx.fillRect(x, y, cellSize, cellSize);
+      }
+    }
+  }
+  total_bytes_received += event.data.byteLength;
+};
+```
+
+And hey! It works!
+
+![remote](/artifacts/odd_even_remote.gif)
+Left is master, right is remote. The remote is using about 65kbps at 120 bullets, and 15 at the start. So the compression really worked!
+
+Now that most of the basics, phyics engine and network is done, we can finally build the game!

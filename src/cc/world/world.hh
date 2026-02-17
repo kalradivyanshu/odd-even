@@ -16,7 +16,7 @@
 namespace world {
 class World {
     std::map<double, std::unique_ptr<physics::Entity>> entities = {};
-    std::vector<uint8_t> word_graphics = std::vector<uint8_t>(WORLD_SIZE * WORLD_SIZE);
+    std::vector<uint8_t> world_graphics = std::vector<uint8_t>(WORLD_SIZE * WORLD_SIZE);
     std::vector<uint8_t> compressed_graphics = std::vector<uint8_t>(WORLD_SIZE * WORLD_SIZE);
     double last_tick_time = 0;
     double average_fps = 0;
@@ -43,7 +43,7 @@ class World {
     }
 
     void tick(double time_ms) {
-        std::memset(word_graphics.data(), 0, WORLD_SIZE * WORLD_SIZE);
+        std::memset(world_graphics.data(), 0, WORLD_SIZE * WORLD_SIZE);
 
         double average_fps = 1000. / (time_ms - this->last_tick_time);
         this->average_fps = (this->average_fps * 0.9) + (average_fps * 0.1);
@@ -57,8 +57,12 @@ class World {
         }
 
         for (auto& [id, entity] : entities) {
-            entity->draw_self(word_graphics);
+            entity->draw_self(world_graphics);
         }
+
+        uLongf compressed_size = compress(world_graphics, compressed_graphics);
+        printf("Compressed size: %zu\n", compressed_size);
+        printf("Uncompressed size: %zu\n", world_graphics.size());
     }
 
     bool did_any_collide() {
@@ -85,7 +89,7 @@ class World {
     }
 
     uint8_t* get_graphics() {
-        return word_graphics.data();
+        return world_graphics.data();
     }
 
     uint8_t* get_compressed_graphics() {
@@ -93,11 +97,11 @@ class World {
     }
 
     void decompress_graphics(size_t compressed_size) {
-        decompress(compressed_graphics, word_graphics, compressed_size);
+        decompress(compressed_graphics, world_graphics, compressed_size);
     }
 
     uLongf compress_graphics() {
-        return compress(word_graphics, compressed_graphics);
+        return compress(world_graphics, compressed_graphics);
     }
 };
 }  // namespace world
