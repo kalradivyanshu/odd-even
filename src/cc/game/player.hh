@@ -17,7 +17,7 @@ class Player : public physics::Spring {
         if (this->team == Team::TEAM_RED) {
             this->setup(physics::Vector(10., 10.), 10, 1.3);
             this->set_position(physics::Vector(0., 0.));
-            this->set_color(graphics::WHITE);
+            this->set_color(graphics::RED);
         } else {
             this->setup(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.), 10, 1.3);
             this->set_position(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.));
@@ -97,7 +97,7 @@ class Player : public physics::Spring {
         }
     }
 
-    void draw_self(std::vector<uint8_t>& graphics) override {
+    void draw_self(uint8_t* graphics) override {
         if(this->team != Team::TEAM_RED) return;
         const auto position = this->get_position();
         const auto color = this->get_color();

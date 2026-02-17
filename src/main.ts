@@ -1,5 +1,6 @@
 import Worker from './worker.ts?worker';
 import { WRTCHandshake } from './wrtc.ts';
+import { Deferred } from './deferred.ts';
 
 window.onload = async function () {
   const canvas = document.getElementById("gridCanvas") as HTMLCanvasElement;
@@ -16,7 +17,8 @@ window.onload = async function () {
   const rtc = new WRTCHandshake(isOfferer ? "offerer" : "answerer");
   (window as any).rtc = rtc;
 
-  let dc: null | RTCDataChannel = null;
+  let dc = new Deferred<RTCDataChannel>();
+  let dcControlChannel = new Deferred<RTCDataChannel>();
 
   if (isOfferer) {
     console.log("Creating room...");
@@ -24,26 +26,32 @@ window.onload = async function () {
     console.log("Room created:", roomID);
     document.getElementById("roomID")!.innerHTML = `Room ID: ${roomID}. Link: ${window.location.href}?roomID=${roomID}`;
     await rtc.waitForOpponent(roomID);
-    dc = rtc.pc.createDataChannel("main-channel");
+    const dc_ = rtc.pc.createDataChannel("main-channel");
+    const dcControlChannel_ = rtc.pc.createDataChannel("control-channel");
+    dc.resolve(dc_);
+    dcControlChannel.resolve(dcControlChannel_);
   } else {
     await rtc.joinRoom(roomID!);
-    dc = await new Promise<RTCDataChannel>((resolve) => {
-      rtc.pc.ondatachannel = (e) => {
-        if(e.channel.label === "main-channel")
-          resolve(e.channel);
-      };
-    });
+    rtc.pc.ondatachannel = (e) => {
+      if (e.channel.label === "main-channel")
+        dc.resolve(e.channel);
+      if (e.channel.label === "control-channel")
+        dcControlChannel.resolve(e.channel);
+    };
+    await Promise.all([dc.async(), dcControlChannel.async()]);
     console.log("Opponent found.");
   }
 
   const worker = new Worker();
   const messageChannel = new MessageChannel();
-  
+
+  const dc_ = await dc.async();
+  const dcControlChannel_ = await dcControlChannel.async();
 
   if (isOfferer) {
-    worker.postMessage({ type: "initialize", ctx: ctx, width, height, port: messageChannel.port2, data_channel: dc }, [ctx, messageChannel.port2, dc]);
+    worker.postMessage({ type: "initialize", ctx: ctx, width, height, port: messageChannel.port2, data_channel: dc_, data_channel_control: dcControlChannel_ }, [ctx, messageChannel.port2, dc_, dcControlChannel_]);
   } else {
-    worker.postMessage({ type: "remote_initialize", ctx: ctx, width, height, port: messageChannel.port2, data_channel: dc }, [ctx, messageChannel.port2, dc]);
+    worker.postMessage({ type: "remote_initialize", ctx: ctx, width, height, port: messageChannel.port2, data_channel: dc_, data_channel_control: dcControlChannel_ }, [ctx, messageChannel.port2, dc_, dcControlChannel_]);
   }
 
   canvas.onmousemove = (event) => {
@@ -55,7 +63,7 @@ window.onload = async function () {
   }
 
   messageChannel.port1.onmessage = (event) => {
-    switch(event.data.type) {
+    switch (event.data.type) {
       case "fps":
         document.getElementById("averageFps")!.innerHTML = `Average FPS: ${event.data.fps.toFixed(2)}. Bullets shot: ${event.data.bullets}`;
         break;

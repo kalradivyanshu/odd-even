@@ -28,14 +28,14 @@ class Pickup : public physics::Entity {
         }
     }
 
-    void draw_animation_first_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+    void draw_animation_first_frame(uint8_t* graphics, const physics::Vector& position) {
         const auto color = graphics::GREEN;
         graphics[(int)position.x + (int)position.y * world::WORLD_SIZE] = color.to_color_u8();
         this->increment_animation_frame();
         return;
     }
 
-    void draw_animation_second_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+    void draw_animation_second_frame(uint8_t* graphics, const physics::Vector& position) {
         const auto color = graphics::GREEN;
         graphics[(int)position.x - 1 + (int)(position.y - 1) * world::WORLD_SIZE] = color.to_color_u8();
         graphics[(int)position.x + 1 + (int)(position.y - 1) * world::WORLD_SIZE] = color.to_color_u8();
@@ -45,7 +45,7 @@ class Pickup : public physics::Entity {
         return;
     }
 
-    void draw_animation_third_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+    void draw_animation_third_frame(uint8_t* graphics, const physics::Vector& position) {
         const auto color = graphics::GREEN;
         graphics[(int)position.x - 1 + (int)(position.y - 1) * world::WORLD_SIZE] = color.to_color_u8();
         graphics[(int)position.x + 1 + (int)(position.y - 1) * world::WORLD_SIZE] = color.to_color_u8();
@@ -59,7 +59,7 @@ class Pickup : public physics::Entity {
         return;
     }
 
-    void draw_animation_fourth_frame(std::vector<uint8_t>& graphics, const physics::Vector& position) {
+    void draw_animation_fourth_frame(uint8_t* graphics, const physics::Vector& position) {
         const auto color = graphics::GREEN;
         graphics[(int)position.x - 2 + (int)(position.y - 2) * world::WORLD_SIZE] = color.to_color_u8();
         graphics[(int)position.x + 2 + (int)(position.y - 2) * world::WORLD_SIZE] = color.to_color_u8();
@@ -69,7 +69,7 @@ class Pickup : public physics::Entity {
         return;
     }
 
-    void draw_self(std::vector<uint8_t>& graphics) override {
+    void draw_self(uint8_t* graphics) override {
         const auto position = this->get_position();
         const auto color = graphics::GREEN;
         if (position.x < 0 || position.x >= world::WORLD_SIZE || position.y < 0 || position.y >= world::WORLD_SIZE) {

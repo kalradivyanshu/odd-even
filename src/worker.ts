@@ -53,7 +53,7 @@ const initialize = async function (ctx: OffscreenCanvasRenderingContext2D, width
   self.wasm = wasm;
 
   const worldSize = wasm.get_world_size();
-
+  const topInfoBarHeight = wasm.get_top_info_bar_height();
 
 
   // paint the entire canvas black
@@ -73,11 +73,11 @@ const initialize = async function (ctx: OffscreenCanvasRenderingContext2D, width
     ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = "white";
     let graphics = wasm.get_graphics(world);
-    let arr = new Uint8Array(wasm.HEAPU8.buffer, graphics, worldSize * worldSize);
+    let arr = new Uint8Array(wasm.HEAPU8.buffer, graphics, (worldSize + topInfoBarHeight) * worldSize);
     for (let x = 0; x < width; x += cellSize) {
       for (let y = 0; y < height; y += cellSize) {
         let index = x / cellSize + (y / cellSize) * worldSize;
-        if (index >= worldSize * worldSize) {
+        if (index >= (worldSize + topInfoBarHeight) * worldSize) {
           throw new Error("Index out of bounds");
         }
         if (arr[index] == 0) {
@@ -108,6 +108,7 @@ const remote_initialize = async function (ctx: OffscreenCanvasRenderingContext2D
   self.wasm = wasm;
 
   const worldSize = wasm.get_world_size();
+  const topInfoBarHeight = wasm.get_top_info_bar_height();
   // paint the entire canvas black
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, width, height);
@@ -139,11 +140,11 @@ const remote_initialize = async function (ctx: OffscreenCanvasRenderingContext2D
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = "white";
-    let arr = new Uint8Array(wasm.HEAPU8.buffer, graphics, worldSize * worldSize);
+    let arr = new Uint8Array(wasm.HEAPU8.buffer, graphics, (worldSize + topInfoBarHeight) * worldSize);
     for (let x = 0; x < width; x += cellSize) {
       for (let y = 0; y < height; y += cellSize) {
         let index = x / cellSize + (y / cellSize) * worldSize;
-        if (index >= worldSize * worldSize) {
+        if (index >= (worldSize + topInfoBarHeight) * worldSize) {
           throw new Error("Index out of bounds");
         }
         if (arr[index] == 0) {

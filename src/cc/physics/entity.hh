@@ -91,7 +91,7 @@ class Entity {
      * @brief Draw the entity to the graphics vector
      * @param graphics The graphics vector to draw to
      */
-    virtual void draw_self(std::vector<uint8_t>& graphics) {
+    virtual void draw_self(uint8_t* graphics) {
         const auto position = this->get_position();
         const auto color = this->get_color();
 

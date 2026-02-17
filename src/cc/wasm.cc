@@ -52,6 +52,10 @@ int get_world_size() {
     return world::WORLD_SIZE;
 }
 
+int get_top_info_bar_height() {
+    return world::TOP_INFO_BAR_HEIGHT;
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     function("new_world", &new_world);
     function("tick", &tick);
@@ -60,6 +64,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("shoot", &shoot);
     function("get_average_fps", &get_average_fps);
     function("get_world_size", &get_world_size);
+    function("get_top_info_bar_height", &get_top_info_bar_height);
     function("get_compressed_graphics", &get_compressed_graphics);
     function("compress_graphics", &compress_graphics);
     function("decompress_graphics", &decompress_graphics);

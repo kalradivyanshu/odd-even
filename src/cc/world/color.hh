@@ -1,4 +1,7 @@
 #include <cstdint>
+
+#pragma once
+
 namespace graphics {
 
 inline uint8_t scale_down_to_16bit(uint8_t x) {
