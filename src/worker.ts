@@ -4,29 +4,50 @@ import { wasm_ty } from "./cc/compiled/wasm_types";
 // Define the size of each cell
 const cellSize = 5;
 
-function coordinate(x: number, y: number, rect: {left: number, top: number}) {
+function move(x: number, y: number, rect: {left: number, top: number}) {
   //@ts-ignore
   let wasm: wasm_ty = self.wasm;
   //@ts-ignore
   let world: number = self.world;
-   
-  wasm.setup_spring_center(world, (x - rect.left) / cellSize, (y - rect.top) / cellSize);
+
+  if(!wasm) return;
+
+  const topInfoBarHeight = wasm.get_top_info_bar_height();
+
+  const worldX = (x - rect.left) / cellSize;
+  const worldY = (y - rect.top) / cellSize - topInfoBarHeight;
+
+  const is_remote: boolean = (self as any).is_remote;
+
+  if(is_remote) {
+    const message = JSON.stringify({ type: "move", x: worldX, y: worldY });
+    (self as any).data_channel_control.send(message);
+    return;
+  }
+
+  wasm.move_p1(world, worldX, worldY);
 }
 
 let bullets = 0;
 
 async function shoot(x: number, y: number, rect: {left: number, top: number}) {
-  for(let i = 0; i < 10; i++) {
-    
-    //@ts-ignore
-    let wasm: wasm_ty = self.wasm;
-    //@ts-ignore
-    let world: number = self.world;
+  //@ts-ignore
+  let wasm: wasm_ty = self.wasm;
+  //@ts-ignore
+  let world: number = self.world;
 
-    wasm.shoot(world, (x - rect.left) / 10, (y - rect.top) / 10);
-    await new Promise(resolve => setTimeout(resolve, 200));
-    bullets++;
+  const topInfoBarHeight = wasm.get_top_info_bar_height();
+  const worldX = (x - rect.left) / cellSize;
+  const worldY = (y - rect.top) / cellSize - topInfoBarHeight;
+
+  const is_remote: boolean = (self as any).is_remote;
+  if(is_remote) {
+    const message = JSON.stringify({ type: "shoot", x: worldX, y: worldY });
+    (self as any).data_channel_control.send(message);
+    return;
   }
+
+  wasm.shoot_p1(world, worldX, worldY);
 }
 
 
@@ -96,6 +117,30 @@ const initialize = async function (ctx: OffscreenCanvasRenderingContext2D, width
     (self as any).data_channel.send(compressed_arr);
   }, 33);
   // Draw the grid
+};
+
+const listen_to_control_channel_master = async function (data_channel: RTCDataChannel) {
+  
+  data_channel.onmessage = (event) => {
+    const message = event.data;
+    const json = JSON.parse(message);
+    const type = json.type;
+    //@ts-ignore
+    let wasm: wasm_ty = self.wasm;
+    //@ts-ignore
+    let world: number = self.world;
+    
+    if(!wasm) return;
+
+    switch(type) {
+      case "move":
+        wasm.move_p2(world, json.x, json.y);
+        break;
+      case "shoot":
+        wasm.shoot_p2(world, json.x, json.y);
+        break;
+    }
+  }
 };
 
 const remote_initialize = async function (ctx: OffscreenCanvasRenderingContext2D, width: number, height: number, data_channel: RTCDataChannel) {
@@ -170,11 +215,24 @@ self.onmessage = async (event) => {
             self.message_port = event.data.port;
             //@ts-ignore
             self.data_channel = event.data.data_channel;
+
+            //@ts-ignore
+            self.is_remote = false;
+
+            //@ts-ignore
+            self.data_channel_control = event.data.data_channel_control;
+
             await new Promise<void>((resolve) => {
                 (self as any).data_channel!.onopen = () => {
                   resolve();
                 };
             });
+            await new Promise<void>((resolve) => {
+                (self as any).data_channel_control!.onopen = () => {
+                  resolve();
+                };
+            });
+            listen_to_control_channel_master((self as any).data_channel_control);
             initialize(ctx, event.data.width, event.data.height);
             break;
         case "remote_initialize":
@@ -183,15 +241,27 @@ self.onmessage = async (event) => {
             const ctx_ = canvas_.getContext("2d")!;
             //@ts-ignore
             self.message_port = event.data.port;
+            //@ts-ignore
+            self.is_remote = true;
+
+            //@ts-ignore
+            self.data_channel_control = event.data.data_channel_control;
+
             await new Promise<void>((resolve) => {
                 data_channel!.onopen = () => {
                   resolve();
                 };
             });
+            await new Promise<void>((resolve) => {
+              (self as any).data_channel_control!.onopen = () => {
+                resolve();
+              };
+            });
+          
             remote_initialize(ctx_, event.data.width, event.data.height, data_channel);
             break;
         case "mousemove":
-            coordinate(event.data.x, event.data.y, event.data.rect);
+            move(event.data.x, event.data.y, event.data.rect);
             break;
         case "click":
             shoot(event.data.x, event.data.y, event.data.rect);

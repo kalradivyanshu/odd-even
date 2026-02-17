@@ -49,8 +49,18 @@ window.onload = async function () {
   const dcControlChannel_ = await dcControlChannel.async();
 
   if (isOfferer) {
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
     worker.postMessage({ type: "initialize", ctx: ctx, width, height, port: messageChannel.port2, data_channel: dc_, data_channel_control: dcControlChannel_ }, [ctx, messageChannel.port2, dc_, dcControlChannel_]);
   } else {
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
     worker.postMessage({ type: "remote_initialize", ctx: ctx, width, height, port: messageChannel.port2, data_channel: dc_, data_channel_control: dcControlChannel_ }, [ctx, messageChannel.port2, dc_, dcControlChannel_]);
   }
 

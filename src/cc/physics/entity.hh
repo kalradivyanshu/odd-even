@@ -40,6 +40,7 @@ class Entity {
     double radius = 0.0;
 
    public:
+    bool ready_to_be_removed = false;
     virtual ~Entity() = default;
     EntityType entity_type = EntityType::BULLET;
 

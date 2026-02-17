@@ -14,17 +14,27 @@ uintptr_t new_world() {
 
 void tick(uintptr_t game) {
     auto g = ((game::Game*)game);
-    g->world.tick(emscripten_get_now());
+    g->tick(emscripten_get_now());
 }
 
-void setup_spring_center(uintptr_t world, double x, double y) {
+void move_p1(uintptr_t world, double x, double y) {
     auto g = ((game::Game*)world);
     g->get_p1()->move(x, y);
 }
 
-void shoot(uintptr_t world, double x, double y) {
+void move_p2(uintptr_t world, double x, double y) {
     auto g = ((game::Game*)world);
-    g->shoot(x, y);
+    g->get_p2()->move(x, y);
+}
+
+void shoot_p1(uintptr_t world, double x, double y) {
+    auto g = ((game::Game*)world);
+    g->shoot_p1(x, y);
+}
+
+void shoot_p2(uintptr_t world, double x, double y) {
+    auto g = ((game::Game*)world);
+    g->shoot_p2(x, y);
 }
 
 uintptr_t get_graphics(uintptr_t world) {
@@ -60,8 +70,10 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("new_world", &new_world);
     function("tick", &tick);
     function("get_graphics", &get_graphics);
-    function("setup_spring_center", &setup_spring_center);
-    function("shoot", &shoot);
+    function("move_p1", &move_p1);
+    function("move_p2", &move_p2);
+    function("shoot_p1", &shoot_p1);
+    function("shoot_p2", &shoot_p2);
     function("get_average_fps", &get_average_fps);
     function("get_world_size", &get_world_size);
     function("get_top_info_bar_height", &get_top_info_bar_height);

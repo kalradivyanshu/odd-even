@@ -11,6 +11,7 @@ class Bullet : public Entity {
     Bullet(Vector position) {
         this->set_position(position);
         this->entity_type = physics::EntityType::BULLET;
+        this->set_color(graphics::WHITE);
     }
 
     void stabilize_velocity() {

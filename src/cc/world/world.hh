@@ -31,8 +31,16 @@ class World {
         this->control_panel = game::ControlPanel();
     }
 
+    double get_time() const {
+        return this->last_tick_time;
+    }
+
     void add_entity(std::unique_ptr<physics::Entity>&& entity) {
         entities.insert_or_assign(entity->get_id(), std::move(entity));
+    }
+
+    void remove_entity(physics::Entity* entity) {
+        entities.erase(entity->get_id());
     }
 
     std::unique_ptr<physics::Entity>& get_entity(double id) {
@@ -65,6 +73,14 @@ class World {
             entity->draw_self(world_graphics.data() + (TOP_INFO_BAR_HEIGHT * WORLD_SIZE));
         }
 
+        for (auto it = entities.begin(); it != entities.end(); ) {
+            if (it->second->ready_to_be_removed) {
+                it = entities.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
         this->control_panel.draw(world_graphics.data());
 
     }
@@ -75,11 +91,12 @@ class World {
         for (auto& [id1, entity1] : entities) {
             int j = 0;
             for (auto& [id2, entity2] : entities) {
-                if (id1 == id2 || j <= i) {
-                    j++;
-                    continue;
-                }
-                if(entity1->entity_type == physics::EntityType::BULLET && entity2->entity_type == physics::EntityType::BULLET) {
+                auto e1 = entity1->entity_type;
+                auto e2 = entity2->entity_type;
+                if((id1 == id2 || j <= i)
+                || (e1 == physics::EntityType::BULLET && e2 == physics::EntityType::BULLET)
+                || (e1 == physics::EntityType::PICKUP && e2 == physics::EntityType::BULLET)
+                || (e1 == physics::EntityType::BULLET && e2 == physics::EntityType::PICKUP)) {
                     j++;
                     continue;
                 }

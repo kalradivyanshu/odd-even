@@ -11,6 +11,8 @@ class Pickup : public physics::Entity {
     double current_time = 0;
 
    public:
+    std::function<bool(Entity*)> on_picked_up = [](Entity* e) { return true; };
+
     Pickup(physics::Vector position) {
         this->static_position = position;
         this->set_position(position);
@@ -21,7 +23,6 @@ class Pickup : public physics::Entity {
     }
 
     void increment_animation_frame() {
-        printf("current_time: %f, last_animation_frame_time: %f\n", this->current_time, this->last_animation_frame_time);
         if((this->current_time - this->last_animation_frame_time) >= 200.) {
             this->frame++;
             this->last_animation_frame_time = this->current_time;
@@ -96,6 +97,9 @@ class Pickup : public physics::Entity {
         if(this->frame == 4) {
             this->draw_animation_fourth_frame(graphics, position);
         }
+        if(this->frame == 5) {
+            this->ready_to_be_removed = true;
+        }
         return;
     }
 
@@ -107,7 +111,7 @@ class Pickup : public physics::Entity {
 
     void on_pickup(physics::Entity* e) {        
         if(this->frame != 0) return;
-
+        if(!this->on_picked_up(e)) return;
         this->increment_animation_frame();
     }
 };

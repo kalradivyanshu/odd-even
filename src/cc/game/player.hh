@@ -9,15 +9,21 @@
 namespace game {
 
 class Player : public physics::Spring {
+    bool player_dead = false;
+
    public:
     Team team = Team::TEAM_RED;
+    bool is_in_danger = false;
+    double last_color_update = 0.0;
+    bool is_red_color = false;
+    std::function<void()> on_player_hit = []() {};
 
     Player(Team team) {
         this->team = team;
         if (this->team == Team::TEAM_RED) {
             this->setup(physics::Vector(10., 10.), 10, 1.3);
             this->set_position(physics::Vector(0., 0.));
-            this->set_color(graphics::RED);
+            this->set_color(graphics::ORANGE);
         } else {
             this->setup(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.), 10, 1.3);
             this->set_position(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.));
@@ -28,13 +34,59 @@ class Player : public physics::Spring {
         this->radius = 1.5;
     }
 
+    bool is_dead() const {
+        return this->player_dead;
+    }
+
+    void mark_as_dead() {
+        this->player_dead = true;
+        this->stop_spring();
+        this->velocity = physics::Vector(0., 20.);
+        this->set_color(graphics::RED);
+    }
+
     void on_bullet_collision(physics::Entity* e) {
         if (e->entity_type == physics::EntityType::BULLET) {
-            auto bullet = dynamic_cast<physics::Bullet*>(e);
-            if (bullet->team != this->team) {
-                printf("Player %s was hit by a bullet\n", this->team == Team::TEAM_RED ? "RED" : "BLUE");
-            }
+            this->on_player_hit();
         }
+    }
+
+    void mark_as_in_danger() {
+        this->is_in_danger = true;
+        this->set_color(graphics::RED);
+        this->last_color_update = this->current_time;
+    }
+
+    void set_team_color() {
+        if(this->player_dead) return;
+        if(this->team == Team::TEAM_RED) {
+            this->set_color(graphics::ORANGE);
+        } else {
+            this->set_color(graphics::BLUE);
+        }
+    }
+
+    void mark_as_safe() {
+        this->is_in_danger = false;
+        this->set_team_color();
+        this->last_color_update = this->current_time;
+        this->is_red_color = false;
+    }
+
+    void switch_color() {
+        if(this->player_dead) return;
+
+        if(!this->is_in_danger) return;
+
+        if((this->current_time - this->last_color_update) < 200.) return;
+
+        if(this->is_red_color) {
+            this->set_team_color();
+        } else {
+            this->set_color(graphics::RED);
+        }
+        this->is_red_color = !this->is_red_color;
+        this->last_color_update = this->current_time;
     }
 
     double get_angle() const {
@@ -98,6 +150,8 @@ class Player : public physics::Spring {
     }
 
     void draw_self(uint8_t* graphics) override {
+        this->switch_color();
+    
         if(this->team != Team::TEAM_RED) return;
         const auto position = this->get_position();
         const auto color = this->get_color();
@@ -115,6 +169,7 @@ class Player : public physics::Spring {
     }
 
     void move(double x, double y) {
+        if(this->player_dead) return;
         this->set_origin(physics::Vector(x, y));
     }
 
