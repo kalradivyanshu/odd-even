@@ -160,7 +160,7 @@ const remote_initialize = async function (ctx: OffscreenCanvasRenderingContext2D
   }
 };
 
-self.onmessage = (event) => {
+self.onmessage = async (event) => {
     switch(event.data.type) {
         case "initialize":
             const canvas: OffscreenCanvas = event.data.ctx;
@@ -169,6 +169,11 @@ self.onmessage = (event) => {
             self.message_port = event.data.port;
             //@ts-ignore
             self.data_channel = event.data.data_channel;
+            await new Promise<void>((resolve) => {
+                (self as any).data_channel!.onopen = () => {
+                  resolve();
+                };
+            });
             initialize(ctx, event.data.width, event.data.height);
             break;
         case "remote_initialize":
@@ -177,6 +182,11 @@ self.onmessage = (event) => {
             const ctx_ = canvas_.getContext("2d")!;
             //@ts-ignore
             self.message_port = event.data.port;
+            await new Promise<void>((resolve) => {
+                data_channel!.onopen = () => {
+                  resolve();
+                };
+            });
             remote_initialize(ctx_, event.data.width, event.data.height, data_channel);
             break;
         case "mousemove":

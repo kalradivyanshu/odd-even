@@ -3,7 +3,15 @@ type Mode = "offerer" | "answerer";
 type MessageHandler = (data: string | ArrayBuffer) => void;
 
 const RTC_CONFIG: RTCConfiguration = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  iceServers: [
+    {
+      urls: [
+        "stun:stun.cloudflare.com:3478",
+        "stun:stun.cloudflare.com:53",
+        "stun:stun.l.google.com:19302"
+      ]
+    },
+  ]
 };
 
 // Signaling server URL - update this with your deployed worker URL
@@ -30,16 +38,39 @@ export class WRTCHandshake {
       this.resolveDc = resolve;
     });
 
-    // Resolve once ICE gathering is complete
+    // Resolve once ICE gathering is complete OR after timeout
     this.iceDone = new Promise<void>((resolve) => {
+      let resolved = false;
+
       this.pc.onicecandidate = (e) => {
-        if (e.candidate === null) resolve();
+        if (e.candidate === null && !resolved) {
+          resolved = true;
+          resolve();
+        }
       };
+
+      // Timeout after 3 seconds - proceed even if ICE gathering incomplete
+      setTimeout(() => {
+        if (!resolved) {
+          console.warn(`[${this.mode}] ICE gathering timeout - proceeding anyway`);
+          resolved = true;
+          resolve();
+        }
+      }, 3000);
     });
 
     // Answerer: wait for the remote data channel
     this.pc.ondatachannel = (e) => {
       this.setupChannel(e.channel);
+    };
+
+    // Monitor connection state
+    this.pc.onconnectionstatechange = () => {
+      console.log(`[${this.mode}] Connection state: ${this.pc.connectionState}`);
+    };
+
+    this.pc.oniceconnectionstatechange = () => {
+      console.log(`[${this.mode}] ICE connection state: ${this.pc.iceConnectionState}`);
     };
   }
 
@@ -49,12 +80,15 @@ export class WRTCHandshake {
   async createOffer(): Promise<RTCSessionDescriptionInit> {
     this.assertMode("offerer");
 
+    const startTime = Date.now();
     // Create the data channel so the SDP includes the media section
     this.setupChannel(this.pc.createDataChannel("data"));
 
     const offer = await this.pc.createOffer();
     await this.pc.setLocalDescription(offer);
+    console.log(`[${this.mode}] SDP created, waiting for ICE gathering...`);
     await this.iceDone;
+    console.log(`[${this.mode}] Offer ready in ${Date.now() - startTime}ms`);
 
     return this.pc.localDescription!;
   }
@@ -73,10 +107,13 @@ export class WRTCHandshake {
   ): Promise<RTCSessionDescriptionInit> {
     this.assertMode("answerer");
 
+    const startTime = Date.now();
     await this.pc.setRemoteDescription(offer);
     const answer = await this.pc.createAnswer();
     await this.pc.setLocalDescription(answer);
+    console.log(`[${this.mode}] SDP created, waiting for ICE gathering...`);
     await this.iceDone;
+    console.log(`[${this.mode}] Answer ready in ${Date.now() - startTime}ms`);
 
     return this.pc.localDescription!;
   }
@@ -115,7 +152,7 @@ export class WRTCHandshake {
    */
   async waitForOpponent(
     roomID?: string,
-    pollInterval = 1000,
+    pollInterval = 200,
     timeout = 3600000,
   ): Promise<void> {
     this.assertMode("offerer");
@@ -158,6 +195,7 @@ export class WRTCHandshake {
   async joinRoom(roomID: string): Promise<void> {
     this.assertMode("answerer");
 
+    const startTime = Date.now();
     // Fetch the offer
     const offerResponse = await fetch(`${SIGNALING_SERVER}/offer/${roomID}`);
 
@@ -167,10 +205,12 @@ export class WRTCHandshake {
 
     const offerData = await offerResponse.json();
     const offer = offerData.offer;
+    console.log(`[${this.mode}] Fetched offer in ${Date.now() - startTime}ms`);
 
     // Create and post the answer
     const answer = await this.acceptOfferAndCreateAnswer(offer);
 
+    const answerStart = Date.now();
     const answerResponse = await fetch(`${SIGNALING_SERVER}/answer/${roomID}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -181,7 +221,8 @@ export class WRTCHandshake {
       throw new Error(`Failed to post answer: ${answerResponse.statusText}`);
     }
 
-    console.log(`[${this.mode}] Joined room ${roomID}`);
+    console.log(`[${this.mode}] Posted answer in ${Date.now() - answerStart}ms`);
+    console.log(`[${this.mode}] Total joinRoom time: ${Date.now() - startTime}ms`);
   }
 
   // ── Messaging ─────────────────────────────────────────────────
@@ -208,9 +249,12 @@ export class WRTCHandshake {
   private setupChannel(channel: RTCDataChannel): void {
     this.dc = channel;
     channel.binaryType = "arraybuffer";
+    const setupTime = Date.now();
+
+    console.log(`[${this.mode}] data channel created, waiting for open...`);
 
     channel.onopen = () => {
-      console.log(`[${this.mode}] data channel open`);
+      console.log(`[${this.mode}] data channel open (took ${Date.now() - setupTime}ms)`);
       this.resolveDc(channel);
     };
 
