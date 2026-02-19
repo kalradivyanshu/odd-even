@@ -21,11 +21,11 @@ class Player : public physics::Spring {
     Player(Team team) {
         this->team = team;
         if (this->team == Team::TEAM_RED) {
-            this->setup(physics::Vector(0., 0.), 10, 3.9);
+            this->setup(physics::Vector(0., 0.), 20, 3.9);
             this->set_position(physics::Vector(0., 0.));
             this->set_color(graphics::ORANGE);
         } else {
-            this->setup(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.), 10, 1.3);
+            this->setup(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.), 20, 3.9);
             this->set_position(physics::Vector(world::WORLD_SIZE - 1., world::WORLD_SIZE - 1.));
             this->set_color(graphics::BLUE);
         }
